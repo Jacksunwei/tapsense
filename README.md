@@ -29,6 +29,45 @@ vscode-knock-demo/
 └── vscode-extension/
 ```
 
+## Installation
+
+### Prerequisites
+
+- macOS on Apple Silicon
+- Xcode Command Line Tools (`xcode-select --install`)
+- Node.js 20+
+- npm
+- VS Code
+
+### Clone and install
+
+```bash
+git clone <your-repo-url> ~/GitHub/vscode-knock-demo
+cd ~/GitHub/vscode-knock-demo
+./build.sh
+```
+
+This installs extension dependencies, builds the Swift sidecar, and compiles the extension.
+
+## Getting started
+
+Fastest path for the first demo:
+
+```bash
+cd ~/GitHub/vscode-knock-demo
+./build.sh
+code .
+```
+
+Then:
+
+1. In VS Code, open the repo root.
+2. Press `F5` to launch the Extension Development Host.
+3. In the Extension Development Host, run `Knock: Start Listening`.
+4. Keep `knock.simulateMode` enabled.
+5. Wait a few seconds for the simulated double-knock.
+6. You should see `Knock knock detected!`.
+
 ## One-command build
 
 ```bash
@@ -79,11 +118,47 @@ npm run compile
 
 ## 3) Run the extension in VS Code
 
-1. Open `~/GitHub/vscode-knock-demo/vscode-extension` in VS Code.
+1. Open `~/GitHub/vscode-knock-demo` in VS Code.
 2. Press `F5` to launch the Extension Development Host.
 3. In the Extension Development Host, run `Knock: Start Listening` from the command palette.
 4. Keep `knock.simulateMode` enabled for the first demo.
 5. Wait a few seconds. The sidecar will emit a simulated `double_knock` event and VS Code should show `Knock knock detected!`.
+
+## Installing the extension for local use
+
+This repo currently ships as a development prototype, not a packaged Marketplace extension.
+
+### Option A: run it in Extension Development Host
+
+This is the easiest path and is recommended for now:
+
+1. Open the repo in VS Code.
+2. Press `F5`.
+3. Use the Extension Development Host as your demo environment.
+
+### Option B: package and install locally
+
+If you want it as an installable local extension:
+
+```bash
+cd ~/GitHub/vscode-knock-demo/vscode-extension
+npm install -g @vscode/vsce
+vsce package
+```
+
+Then in VS Code:
+
+1. Run `Extensions: Install from VSIX...`
+2. Select the generated `.vsix` file.
+3. Reload VS Code.
+
+After installation, make sure the sidecar binary exists at:
+
+```bash
+~/GitHub/vscode-knock-demo/knock-sidecar/.build/release/KnockSidecar
+```
+
+Or set `knock.sidecarPath` to a custom binary path in VS Code settings.
 
 ## Useful commands
 
