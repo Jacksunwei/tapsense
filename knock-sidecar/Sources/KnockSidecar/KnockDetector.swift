@@ -42,6 +42,16 @@ final class KnockDetector {
         self.lastEmitTime = -(cooldownMs / 1000)
     }
 
+    convenience init(profile: DetectorProfile, maxKnocksPerPattern: Int = 3) {
+        self.init(
+            magnitudeThreshold: profile.magnitudeThreshold,
+            minGapMs: profile.minGapMs,
+            maxGapMs: profile.maxGapMs,
+            cooldownMs: profile.cooldownMs,
+            maxKnocksPerPattern: maxKnocksPerPattern
+        )
+    }
+
     func process(_ reading: AccelerometerReading) -> KnockEvent? {
         let now = reading.timestamp
 

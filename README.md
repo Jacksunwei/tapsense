@@ -6,6 +6,7 @@ Prototype monorepo for a MacBook knock-triggered VS Code notification.
 
 - `vscode-extension/` - VS Code extension in TypeScript
 - `knock-sidecar/` - macOS sidecar binary in Swift
+- `mac-menu-app/` - native macOS menu bar controller app in Swift
 
 ## Demo goal
 
@@ -35,6 +36,7 @@ vscode-knock-demo/
 ├── README.md
 ├── docs/
 ├── knock-sidecar/
+├── mac-menu-app/
 └── vscode-extension/
 ```
 
@@ -44,7 +46,7 @@ vscode-knock-demo/
 - `docs/vscode-extension.md` - how the extension starts the sidecar and handles events
 - `docs/knock-sidecar.md` - how the sidecar is structured and how knock detection works
 - `docs/compatibility.md` - provisional hardware compatibility matrix for the private sensor path
-- `docs/mac-menu-app.md` - proposed architecture for a native macOS menu bar controller app
+- `docs/mac-menu-app.md` - architecture and MVP implementation notes for the native macOS menu bar controller app
 
 ## Installation
 
@@ -64,7 +66,7 @@ cd ~/GitHub/vscode-knock-demo
 ./build.sh
 ```
 
-This installs extension dependencies, builds the Swift sidecar, and compiles the extension.
+This installs extension dependencies, builds the Swift sidecar, compiles the extension, and builds the menu bar app executable.
 
 ## Getting started
 
@@ -133,7 +135,34 @@ npm install
 npm run compile
 ```
 
-## 3) Run the extension in VS Code
+## 3) Build and run the macOS menu bar app
+
+Build:
+
+```bash
+cd ~/GitHub/vscode-knock-demo/mac-menu-app
+swift build -c release
+```
+
+Run:
+
+```bash
+cd ~/GitHub/vscode-knock-demo/mac-menu-app
+./.build/release/KnockMenuApp
+```
+
+Current MVP menu actions:
+
+- start / stop sidecar
+- toggle simulate mode
+- choose `Palm Rest` or `Desk` mode
+- choose `Low` / `Medium` / `High` sensitivity
+- view status and last event
+- send a test notification-style alert
+
+Note: this first version is a native menu bar executable, not a packaged `.app` bundle yet.
+
+## 4) Run the extension in VS Code
 
 1. Open `~/GitHub/vscode-knock-demo` in VS Code.
 2. Press `F5` to launch the Extension Development Host.

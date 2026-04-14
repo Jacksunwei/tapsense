@@ -1,26 +1,73 @@
-# macOS menu bar app architecture
+# macOS menu bar app
+
+This document now covers both:
+
+1. the rationale for a native menu bar app
+2. the MVP implementation that now exists in this repo
+
+## Current implementation
+
+The repo now includes:
+
+```text
+mac-menu-app/
+├── Package.swift
+└── Sources/
+    └── KnockMenuApp/
+        ├── main.swift
+        ├── MenuApp.swift
+        ├── Models.swift
+        └── SidecarController.swift
+```
+
+It is a Swift Package Manager executable that launches a native macOS status bar item.
+
+## What the MVP does
+
+The current menu bar app can:
+
+- start the sidecar
+- stop the sidecar
+- toggle simulate mode
+- switch between `Palm Rest` and `Desk` profiles
+- switch between `Low`, `Medium`, and `High` sensitivity
+- show current status and last event in the menu
+- trigger a test alert
+
+## Current limitations
+
+- it runs as an executable, not a signed `.app` bundle yet
+- it still starts the sidecar as a child process
+- it does not yet expose a socket or XPC control plane
+- VS Code and the menu app do not yet share a single long-running sidecar instance
+- sidecar profile tuning is still heuristic, not hardware-calibrated
 
 ## Why add a menu bar app
 
 A VS Code extension is the right place for editor actions, but it is not the right place for system-level lifecycle control.
 
-A dedicated macOS menu bar app would let the knock system feel like a native Mac utility instead of an editor-only demo.
+A dedicated macOS menu bar app makes the knock system feel like a native Mac utility instead of an editor-only demo.
 
-## Proposed three-part architecture
+## Current architecture
 
 ```text
 macOS menu bar app
-        ↓ control / config
+        ↓ launches / controls
      knock-sidecar
         ↓ knock events
    VS Code extension
 ```
 
+In the current MVP:
+
+- the menu app launches the sidecar directly with `Process`
+- the menu app controls mode, sensitivity, and simulate flags through CLI arguments
+- the sidecar emits JSON events like `started`, `knock_pattern`, `error`, and `stopped`
+- the menu app updates its menu state based on those events
+
 ## Responsibilities
 
 ### 1. `knock-sidecar`
-
-Keep this as the sensor and detection engine.
 
 Responsibilities:
 
@@ -28,11 +75,8 @@ Responsibilities:
 - apply detection profiles such as palm-rest and desk
 - classify knock patterns
 - emit structured events
-- expose minimal control hooks for start, stop, mode, and sensitivity
 
 ### 2. `vscode-extension`
-
-Keep this focused on IDE behavior.
 
 Responsibilities:
 
@@ -43,18 +87,13 @@ Responsibilities:
 
 ### 3. `mac-menu-app`
 
-Add a native macOS app, ideally SwiftUI + `MenuBarExtra`.
-
 Responsibilities:
 
 - show current sidecar status
 - start and stop the sidecar
 - switch between `palmRest` and `desk` modes
 - adjust sensitivity
-- trigger calibration
-- open logs
-- optionally launch at login
-- expose global notifications and debugging UI
+- expose quick local controls without opening VS Code
 
 ## Suggested repo layout
 
@@ -65,102 +104,78 @@ vscode-knock-demo/
 └── mac-menu-app/
 ```
 
-## Suggested control model
+## Implementation notes
 
-There are two viable control models.
+### `main.swift`
 
-### Option A. Sidecar as a long-running local service
+Creates and runs `NSApplication`.
 
-Menu bar app starts and owns the sidecar.
+### `MenuApp.swift`
 
-- menu bar app manages lifecycle
-- VS Code extension connects as a client / subscriber
-- best if we want the knock system active even when VS Code is closed
+Creates the status bar item and menu structure.
 
-Pros:
-- cleaner product model
-- sidecar can remain alive across editors
-- better fit for menu bar utility behavior
+Main menu items in the MVP:
 
-Cons:
-- requires a local control / event transport, such as socket or XPC
+- Status
+- Last Event
+- Start / Stop Listening
+- Simulate Mode
+- Mode submenu
+- Sensitivity submenu
+- Test Notification
+- Quit
 
-### Option B. Menu bar app as a config + launcher wrapper
+### `SidecarController.swift`
 
-Menu bar app mainly manages config and can launch or stop the sidecar process, while the VS Code extension can still spawn it directly for editor-only use.
+Owns the `Process` that runs the sidecar.
 
-Pros:
-- simpler migration from the current prototype
-- keeps current extension behavior mostly intact
+Responsibilities:
 
-Cons:
-- lifecycle ownership becomes split
-- more chances for duplicate sidecar processes
+- resolve sidecar binary path
+- launch with selected CLI arguments
+- read stdout and stderr
+- decode JSON events
+- keep UI state updated
 
-## Recommendation
+### `Models.swift`
 
-Prefer **Option A** if we continue this project.
+Shared app-side models for:
 
-That means:
+- mode
+- sensitivity
+- sidecar JSON event decoding
 
-- sidecar becomes the single runtime engine
-- menu bar app owns lifecycle and config
-- VS Code extension becomes a client that subscribes to knock events and only handles editor actions
+## Why this MVP shape is reasonable
 
-## Suggested transport evolution
+It gives us a real native control surface quickly, without blocking on a larger service architecture rewrite.
 
-Current prototype uses stdio JSON because it is the lightest path.
+That means we can already:
 
-For a menu bar app architecture, evolve toward one of these:
+- iterate on UX
+- validate whether the menu bar utility feels right
+- validate whether profile switching is a useful concept
+- keep the heavier transport refactor for later
+
+## Recommended next evolution
+
+If we continue the project, the next architectural step should be to move from `menu app owns child process` toward `single long-running sidecar service`.
+
+Preferred future shape:
+
+```text
+macOS menu bar app
+        ↓ control API
+   long-running sidecar service
+        ↓ event stream
+   VS Code extension client
+```
+
+## Recommended transport options
+
+For that next step, the strongest candidates are:
 
 1. Unix domain socket with newline-delimited JSON
 2. local WebSocket
-3. XPC if we want a more native macOS-only approach
+3. XPC for a more native macOS-only approach
 
-For speed of implementation, a Unix socket is probably the best next step.
-
-## Suggested shared concepts
-
-The menu bar app and VS Code extension should share the same conceptual config model:
-
-- `mode`: `palmRest | desk`
-- `sensitivity`: `low | medium | high`
-- per-pattern bindings:
-  - `single`
-  - `double`
-  - `triple`
-
-## Minimal v1 menu bar UI
-
-Recommended first version:
-
-- status: running / stopped
-- mode picker: palm-rest / desk
-- sensitivity picker: low / medium / high
-- start / stop
-- test knock notification
-- open log file
-- quit
-
-## Nice v2 features
-
-- calibration wizard
-- live waveform preview
-- recent event history
-- launch at login
-- profile presets for different desks / dock setups
-- separate editor profiles for VS Code-compatible IDEs
-
-## Implementation recommendation
-
-If we build this, I would do it in this order:
-
-1. keep current sidecar and extension intact
-2. introduce a stable local event / control transport
-3. add `mac-menu-app/` as a SwiftUI menu bar target
-4. move lifecycle control from extension-spawned stdio toward menu bar ownership
-5. keep a dev fallback where the extension can still spawn the sidecar directly
-
-## Why this is a good next step
-
-This turns the project from a VS Code demo into a real Mac utility with editor integrations layered on top.
+For speed and simplicity, a Unix domain socket is probably the best next move.
