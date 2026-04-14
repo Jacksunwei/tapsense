@@ -107,7 +107,7 @@ function startListening() {
     sidecarProcess = spawned;
   } catch (err) {
     vscode.window.showErrorMessage(
-      `Failed to start knock sidecar: ${err}. Build it first with: cd tapsense-sidecar && swift build -c release`,
+      `Failed to start TapSense sidecar: ${err}. Build it first with: cd tapsense-sidecar && swift build -c release`,
     );
     return;
   }
