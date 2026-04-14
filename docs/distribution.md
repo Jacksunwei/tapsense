@@ -56,10 +56,10 @@ This repo is currently set up assuming future public hosting under Jack's GitHub
 
 Current bundle metadata uses:
 
-- bundle identifier: `com.jacksun.knockmenu`
+- bundle identifier: `com.jacksunwei.knockmenu`
 - app display name: `KnockMenu`
 
-These are placeholders that can be refined when the final GitHub repo name and release process are chosen.
+These are set up assuming future public hosting under the `jacksunwei` GitHub handle and can still be refined when the final repo name and signing identity are chosen.
 
 ## Recommended future release flow
 
@@ -75,10 +75,10 @@ cask "knockmenu" do
   version "0.1.0"
   sha256 "..."
 
-  url "https://github.com/jacksunhomes/vscode-knock-demo/releases/download/v#{version}/KnockMenu.app.zip"
+  url "https://github.com/jacksunwei/vscode-knock-demo/releases/download/v#{version}/KnockMenu.app.zip"
   name "KnockMenu"
   desc "Menu bar controller for MacBook knock detection"
-  homepage "https://github.com/jacksunhomes/vscode-knock-demo"
+  homepage "https://github.com/jacksunwei/vscode-knock-demo"
 
   app "KnockMenu.app"
 end
