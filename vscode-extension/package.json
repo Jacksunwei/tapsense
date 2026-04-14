@@ -1,0 +1,65 @@
+{
+  "name": "vscode-knock",
+  "displayName": "Knock Knock Detector",
+  "description": "Detects double-knock gestures on your MacBook via accelerometer sidecar",
+  "version": "0.0.1",
+  "publisher": "demo",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCommand:knock.start",
+    "onCommand:knock.stop",
+    "onCommand:knock.test",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "knock.start",
+        "title": "Knock: Start Listening"
+      },
+      {
+        "command": "knock.stop",
+        "title": "Knock: Stop Listening"
+      },
+      {
+        "command": "knock.test",
+        "title": "Knock: Test Notification"
+      }
+    ],
+    "configuration": {
+      "title": "Knock Detector",
+      "properties": {
+        "knock.sidecarPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the knock-sidecar binary. If empty, uses the built binary in the repo."
+        },
+        "knock.simulateMode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run sidecar in --simulate mode (no real accelerometer needed)."
+        },
+        "knock.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start listening on extension activation."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "build:sidecar": "cd ../knock-sidecar && swift build -c release"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,4 @@
+vscode-extension/node_modules/
+vscode-extension/out/
+knock-sidecar/.build/
+.DS_Store
