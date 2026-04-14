@@ -22,23 +22,39 @@ final class KnockDetector {
     private let minGapMs: Double
     private let cooldownMs: Double
     private let maxKnocksPerPattern: Int
+    private let confirmSamples: Int
+    private let releaseRatio: Double
 
     private var knockTimes: [TimeInterval] = []
     private var lastEmitTime: TimeInterval = 0
-    private var isAboveThreshold = false
+
+    // High-pass filter state (per-axis gravity removal)
+    private let gravityAlpha: Double = 0.95
+    private var gravityX: Double = 0
+    private var gravityY: Double = 0
+    private var gravityZ: Double = 0
+    private var gravityInitialized = false
+
+    // Peak confirmation state
+    private var consecutiveAbove: Int = 0
+    private var knockFired: Bool = false
 
     init(
-        magnitudeThreshold: Double = 2.0,
+        magnitudeThreshold: Double = 0.5,
         minGapMs: Double = 50,
         maxGapMs: Double = 400,
         cooldownMs: Double = 1000,
-        maxKnocksPerPattern: Int = 3
+        maxKnocksPerPattern: Int = 3,
+        confirmSamples: Int = 2,
+        releaseRatio: Double = 0.5
     ) {
         self.magnitudeThreshold = magnitudeThreshold
         self.minGapMs = minGapMs
         self.maxGapMs = maxGapMs
         self.cooldownMs = cooldownMs
         self.maxKnocksPerPattern = maxKnocksPerPattern
+        self.confirmSamples = confirmSamples
+        self.releaseRatio = releaseRatio
         self.lastEmitTime = -(cooldownMs / 1000)
     }
 
@@ -59,20 +75,45 @@ final class KnockDetector {
             return event
         }
 
-        let magnitude = sqrt(reading.x * reading.x + reading.y * reading.y + reading.z * reading.z)
-        let isCurrentlyAbove = magnitude > magnitudeThreshold
+        let magnitude = filteredMagnitude(reading)
+        let releaseThreshold = magnitudeThreshold * releaseRatio
 
-        defer { isAboveThreshold = isCurrentlyAbove }
-
-        guard isCurrentlyAbove else {
+        if magnitude > magnitudeThreshold {
+            consecutiveAbove += 1
+        } else if magnitude < releaseThreshold {
+            consecutiveAbove = 0
+            knockFired = false
+            return nil
+        } else {
             return nil
         }
 
-        guard !isAboveThreshold else {
+        guard consecutiveAbove >= confirmSamples && !knockFired else {
             return nil
         }
 
+        knockFired = true
         return registerKnock(at: now)
+    }
+
+    private func filteredMagnitude(_ reading: AccelerometerReading) -> Double {
+        if !gravityInitialized {
+            gravityX = reading.x
+            gravityY = reading.y
+            gravityZ = reading.z
+            gravityInitialized = true
+            return 0
+        }
+
+        gravityX = gravityAlpha * gravityX + (1 - gravityAlpha) * reading.x
+        gravityY = gravityAlpha * gravityY + (1 - gravityAlpha) * reading.y
+        gravityZ = gravityAlpha * gravityZ + (1 - gravityAlpha) * reading.z
+
+        let ax = reading.x - gravityX
+        let ay = reading.y - gravityY
+        let az = reading.z - gravityZ
+
+        return sqrt(ax * ax + ay * ay + az * az)
     }
 
     private func finalizeIfTimedOut(now: TimeInterval) -> KnockEvent? {
