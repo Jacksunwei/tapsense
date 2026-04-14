@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build TapSense
+        run: ./build.sh
+
+      - name: Package VS Code Extension
+        run: |
+          cd tapsense-vscode
+          npm install
+          npx vsce package -o ../dist/tapsense-vscode.vsix
+
+      - name: Zip App Bundle
+        run: |
+          cd dist
+          zip -r TapSense.app.zip TapSense.app
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/TapSense.app.zip
+            dist/tapsense-vscode.vsix
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

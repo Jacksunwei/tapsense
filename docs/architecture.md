@@ -2,7 +2,7 @@
 
 ## Why there are two projects
 
-This prototype intentionally separates hardware access from VS Code UX.
+TapSense intentionally separates hardware access from VS Code UX.
 
 ### VS Code extension responsibilities
 
@@ -67,7 +67,7 @@ If this becomes a real product, we could still keep stdio or upgrade to a socket
 
 ### Pros
 
-- easy to demo
+- easy to test
 - clear separation of concerns
 - sidecar can be tested outside VS Code
 - extension can stay almost entirely TypeScript

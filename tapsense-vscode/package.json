@@ -3,7 +3,7 @@
   "displayName": "TapSense",
   "description": "Detects single, double, and triple tap gestures on your MacBook via accelerometer sidecar",
   "version": "0.0.1",
-  "publisher": "demo",
+  "publisher": "jacksunwei",
   "engines": {
     "vscode": "^1.85.0"
   },

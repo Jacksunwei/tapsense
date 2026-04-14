@@ -26,7 +26,7 @@ That abstraction allows the rest of the system to stay independent from the conc
 
 ### `SimulatedAccelerometer`
 
-This implementation exists to make the full demo reliable.
+This implementation exists to make the testing reliable.
 
 It:
 
@@ -34,13 +34,13 @@ It:
 - emits mostly stable readings
 - injects synthetic spike patterns for one, two, or three taps
 - cycles through repeated single, double, and triple patterns
-- uses synthetic timestamps so the demo stays stable even if timer scheduling jitters
+- uses synthetic timestamps so the simulation stays stable even if timer scheduling jitters
 
 This lets us verify the full pipeline without depending on private hardware APIs.
 
 ### `IOKitAccelerometer`
 
-This is the experimental real sensor path.
+This is the beta real sensor path.
 
 Current design:
 

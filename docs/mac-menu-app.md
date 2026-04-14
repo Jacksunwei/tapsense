@@ -46,7 +46,7 @@ The current menu bar app can:
 
 A VS Code extension is the right place for editor actions, but it is not the right place for system-level lifecycle control.
 
-A dedicated macOS menu bar app makes the tap system feel like a native Mac utility instead of an editor-only demo.
+A dedicated macOS menu bar app makes the tap system feel like a native Mac utility instead of an editor-only tool.
 
 ## Current architecture
 

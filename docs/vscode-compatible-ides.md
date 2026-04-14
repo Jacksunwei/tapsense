@@ -2,7 +2,7 @@
 
 ## Core idea
 
-This prototype is command-driven, not shortcut-driven.
+TapSense is command-driven, not shortcut-driven.
 
 That distinction matters in VS Code-compatible IDEs.
 

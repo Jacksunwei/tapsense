@@ -10,7 +10,7 @@ The hidden accelerometer / IMU path used by projects like Tap is not documented 
 |---|---|---:|---|
 | Apple Silicon MacBook Pro | Likely supported | High | Strongest public evidence. Reverse-engineered projects explicitly report working on MacBook Pro models. |
 | Apple Silicon MacBook Air | Possibly supported | Medium | Plausible, but we have not verified it in this repo yet. Public evidence is weaker than for MacBook Pro. |
-| Intel MacBook Pro / Air | Unclear / likely different path | Low | Older Macs had different motion-sensor history. This prototype targets the Apple Silicon SPU HID path, not the older SMS path. |
+| Intel MacBook Pro / Air | Unclear / likely different path | Low | Older Macs had different motion-sensor history. TapSense targets the Apple Silicon SPU HID path, not the older SMS path. |
 | Mac mini | Likely unsupported | High | Desktop form factor, no practical motion-sensor use case, and this repo did not find the expected device on the Mac mini host. |
 | Mac Studio | Likely unsupported | Medium | Same reasoning as Mac mini. |
 | Mac Pro | Likely unsupported | Medium | Same reasoning as other desktop Macs. |

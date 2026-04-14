@@ -6,30 +6,19 @@ TapSense lets you trigger VS Code commands by physically tapping the palm rest o
 
 ---
 
-## 🚀 Quick Start (Demo Mode)
+## 🚀 One-Command Install
 
-The fastest way to see TapSense in action is using **Simulation Mode**.
+Run this in your terminal to install the latest version of TapSense:
 
-1. **Clone & Build**:
-   ```bash
-   git clone https://github.com/Jacksunwei/tapsense.git
-   cd tapsense
-   ./build.sh
-   ```
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jacksunwei/tapsense/main/install.sh | bash
+```
 
-2. **Open the App**:
-   ```bash
-   open dist/TapSense.app
-   ```
-   *You'll see a small circle in your macOS menu bar. By default, it's in **Simulate Mode**, emitting virtual taps every few seconds.*
-
-3. **Activate in VS Code**:
-   - Open this repo in VS Code.
-   - Press **F5** (Extension Development Host).
-   - In the new window, run `TapSense: Start Listening` from the Command Palette (`Cmd+Shift+P`).
-   - Watch the notifications as the simulated taps come in!
+*Requires [Homebrew](https://brew.sh).*
 
 ---
+
+## 🛠 Manual Installation (for Developers)
 
 ## 🛠 How to Use (Real Hardware)
 

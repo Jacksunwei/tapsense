@@ -65,7 +65,7 @@ final class IOKitAccelerometer: AccelerometerSource {
 
         if device == nil {
             fputs("[accelerometer] No Apple SPU accelerometer device matched usage page 0xFF00 / usage 0x03.\n", stderr)
-            fputs("[accelerometer] This prototype falls back to simulate mode well, but real mode depends on the private HID device being visible on this Mac.\n", stderr)
+            fputs("[accelerometer] TapSense falls back to simulate mode well, but real mode depends on the private HID device being visible on this Mac.\n", stderr)
             return false
         }
 
