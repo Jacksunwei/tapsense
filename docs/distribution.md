@@ -77,7 +77,7 @@ cask "tapsense" do
 
   url "https://github.com/jacksunwei/tapsense/releases/download/v#{version}/TapSense.app.zip"
   name "TapSense"
-  desc "Menu bar controller for MacBook knock detection"
+  desc "Menu bar controller for MacBook tap detection"
   homepage "https://github.com/jacksunwei/tapsense"
 
   app "TapSense.app"

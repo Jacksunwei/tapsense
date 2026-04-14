@@ -6,7 +6,7 @@ final class SimulatedAccelerometer: AccelerometerSource {
 
     private var tickCount = 0
     private let cycleLength = 540
-    private let knockDuration = 3
+    private let tapDuration = 3
     private let patternOffsets: [[Int]] = [
         [0],
         [0, 15],
@@ -14,7 +14,7 @@ final class SimulatedAccelerometer: AccelerometerSource {
     ]
 
     func start(callback: @escaping (AccelerometerReading) -> Void) -> Bool {
-        fputs("[simulator] Running in simulation mode. Cycling single, double, and triple knock patterns.\n", stderr)
+        fputs("[simulator] Running in simulation mode. Cycling single, double, and triple tap patterns.\n", stderr)
 
         let source = DispatchSource.makeTimerSource(queue: queue)
         source.schedule(deadline: .now(), repeating: .milliseconds(10))
@@ -38,7 +38,7 @@ final class SimulatedAccelerometer: AccelerometerSource {
 
         var x = 0.0, y = 0.0, z = 1.0
 
-        for offset in activePattern where phaseTick >= offset && phaseTick < offset + knockDuration {
+        for offset in activePattern where phaseTick >= offset && phaseTick < offset + tapDuration {
             z += 2.5
         }
 

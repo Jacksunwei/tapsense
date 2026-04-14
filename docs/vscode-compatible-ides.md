@@ -6,7 +6,7 @@ This prototype is command-driven, not shortcut-driven.
 
 That distinction matters in VS Code-compatible IDEs.
 
-A knock pattern should trigger the command id you want, not the visible keybinding. If an IDE binds `Cmd+L` to a custom action, you should configure the command id behind that action.
+A tap pattern should trigger the command id you want, not the visible keybinding. If an IDE binds `Cmd+L` to a custom action, you should configure the command id behind that action.
 
 ## What usually carries over from VS Code
 
@@ -28,24 +28,24 @@ If those pieces exist, this prototype should map cleanly.
 4. Open the IDE's keyboard shortcuts UI.
 5. Search for the shortcut you want to mirror, for example `Cmd+L`.
 6. Find the real command id currently bound to that shortcut.
-7. Put that command id into the knock settings.
-8. Use the built-in knock test commands before trying real hardware.
+7. Put that command id into the tap settings.
+8. Use the built-in tap test commands before trying real hardware.
 
 ## Example settings template
 
 ```json
 {
-  "tapsense.singleKnock.command": "",
-  "tapsense.singleKnock.args": [],
-  "tapsense.singleKnock.showNotification": true,
+  "tapsense.singleTap.command": "",
+  "tapsense.singleTap.args": [],
+  "tapsense.singleTap.showNotification": true,
 
-  "tapsense.doubleKnock.command": "the.actual.command.id",
-  "tapsense.doubleKnock.args": [],
-  "tapsense.doubleKnock.showNotification": true,
+  "tapsense.doubleTap.command": "the.actual.command.id",
+  "tapsense.doubleTap.args": [],
+  "tapsense.doubleTap.showNotification": true,
 
-  "tapsense.tripleKnock.command": "",
-  "tapsense.tripleKnock.args": [],
-  "tapsense.tripleKnock.showNotification": true
+  "tapsense.tripleTap.command": "",
+  "tapsense.tripleTap.args": [],
+  "tapsense.tripleTap.showNotification": true
 }
 ```
 
@@ -57,7 +57,7 @@ Then you should not configure:
 
 ```json
 {
-  "tapsense.doubleKnock.command": "expandLineSelection"
+  "tapsense.doubleTap.command": "expandLineSelection"
 }
 ```
 
@@ -68,22 +68,22 @@ Instead, configure the actual command id bound in that IDE.
 If Google Anti-Gravity is using a VS Code-compatible extension host and keybinding system, the pattern is the same:
 
 1. inspect the actual command bound to the shortcut
-2. use that command id in knock settings
+2. use that command id in tap settings
 3. ignore the shortcut string itself during configuration
 
 Example:
 
 ```json
 {
-  "tapsense.doubleKnock.command": "the.actual.command.id.behind.cmdL",
-  "tapsense.doubleKnock.args": [],
-  "tapsense.doubleKnock.showNotification": true
+  "tapsense.doubleTap.command": "the.actual.command.id.behind.cmdL",
+  "tapsense.doubleTap.args": [],
+  "tapsense.doubleTap.showNotification": true
 }
 ```
 
 ## Troubleshooting
 
-### The shortcut works, but knock does nothing
+### The shortcut works, but tap does nothing
 
 Likely causes:
 
@@ -94,7 +94,7 @@ Likely causes:
 
 ### How to isolate the problem
 
-1. run `TapSense: Test Double Knock`
+1. run `TapSense: Test Double Tap`
 2. if notification appears, extension is alive
 3. set the target command to a known built-in command such as `workbench.action.quickOpen`
 4. if that works, the remaining problem is your custom target command id

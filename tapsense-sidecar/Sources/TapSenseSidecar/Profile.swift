@@ -1,19 +1,19 @@
 import Foundation
 
-enum KnockMode: String {
+enum TapMode: String {
     case palmRest
     case desk
 }
 
-enum KnockSensitivity: String {
+enum TapSensitivity: String {
     case low
     case medium
     case high
 }
 
 struct DetectorProfile {
-    let mode: KnockMode
-    let sensitivity: KnockSensitivity
+    let mode: TapMode
+    let sensitivity: TapSensitivity
     let magnitudeThreshold: Double
     let minGapMs: Double
     let maxGapMs: Double
@@ -21,7 +21,7 @@ struct DetectorProfile {
 }
 
 enum ProfileFactory {
-    static func make(mode: KnockMode, sensitivity: KnockSensitivity) -> DetectorProfile {
+    static func make(mode: TapMode, sensitivity: TapSensitivity) -> DetectorProfile {
         switch (mode, sensitivity) {
         case (.palmRest, .low):
             return DetectorProfile(mode: mode, sensitivity: sensitivity, magnitudeThreshold: 1.2, minGapMs: 70, maxGapMs: 280, cooldownMs: 1000)

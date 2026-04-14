@@ -16,7 +16,7 @@ This prototype intentionally separates hardware access from VS Code UX.
 
 - talk to the local sensor source
 - normalize raw readings into a simple stream
-- detect single-, double-, and triple-knock gestures
+- detect single-, double-, and triple-tap gestures
 - emit machine-readable events over stdout
 
 This split keeps the extension simple and makes the sensor code replaceable.
@@ -24,13 +24,13 @@ This split keeps the extension simple and makes the sensor code replaceable.
 ## High-level event flow
 
 ```text
-Physical knock or simulated knock
+Physical tap or simulated tap
         ↓
 tapsense-sidecar sensor source
         ↓
-KnockDetector classifies knock pattern
+TapDetector classifies tap pattern
         ↓
-stdout JSON event: {"type":"knock_pattern","pattern":"double","count":2}
+stdout JSON event: {"type":"tap_pattern","pattern":"double","count":2}
         ↓
 VS Code extension reads line
         ↓
@@ -45,9 +45,9 @@ Example messages:
 
 ```json
 {"type":"started","mode":"simulate"}
-{"type":"knock_pattern","pattern":"single","count":1,"timestamp":0.01}
-{"type":"knock_pattern","pattern":"double","count":2,"timestamp":1.95}
-{"type":"knock_pattern","pattern":"triple","count":3,"timestamp":3.90}
+{"type":"tap_pattern","pattern":"single","count":1,"timestamp":0.01}
+{"type":"tap_pattern","pattern":"double","count":2,"timestamp":1.95}
+{"type":"tap_pattern","pattern":"triple","count":3,"timestamp":3.90}
 {"type":"error","message":"Failed to start accelerometer. Use --simulate mode."}
 {"type":"stopped"}
 ```

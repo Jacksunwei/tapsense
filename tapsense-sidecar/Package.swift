@@ -12,6 +12,10 @@ let package = Package(
                 .linkedFramework("IOKit"),
                 .linkedFramework("CoreFoundation"),
             ]
+        ),
+        .testTarget(
+            name: "TapSenseSidecarTests",
+            dependencies: ["TapSenseSidecar"]
         )
     ]
 )

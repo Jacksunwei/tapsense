@@ -2,8 +2,8 @@ import Foundation
 
 struct SidecarOptions {
     let simulate: Bool
-    let mode: KnockMode
-    let sensitivity: KnockSensitivity
+    let mode: TapMode
+    let sensitivity: TapSensitivity
 }
 
 func emitJSON(_ dict: [String: Any]) {
@@ -15,8 +15,8 @@ func emitJSON(_ dict: [String: Any]) {
 
 func parseOptions(arguments: [String]) -> SidecarOptions {
     var simulate = false
-    var mode: KnockMode = .palmRest
-    var sensitivity: KnockSensitivity = .medium
+    var mode: TapMode = .palmRest
+    var sensitivity: TapSensitivity = .medium
 
     var index = 1
     while index < arguments.count {
@@ -26,13 +26,13 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
             simulate = true
         case "--mode":
             if index + 1 < arguments.count,
-               let parsed = KnockMode(rawValue: arguments[index + 1]) {
+               let parsed = TapMode(rawValue: arguments[index + 1]) {
                 mode = parsed
                 index += 1
             }
         case "--sensitivity":
             if index + 1 < arguments.count,
-               let parsed = KnockSensitivity(rawValue: arguments[index + 1]) {
+               let parsed = TapSensitivity(rawValue: arguments[index + 1]) {
                 sensitivity = parsed
                 index += 1
             }
@@ -55,12 +55,12 @@ if options.simulate {
     source = IOKitAccelerometer()
 }
 
-let detector = KnockDetector(profile: profile)
+let detector = TapDetector(profile: profile)
 
 let started = source.start { reading in
     if let event = detector.process(reading) {
         emitJSON([
-            "type": "knock_pattern",
+            "type": "tap_pattern",
             "pattern": event.pattern,
             "count": event.count,
             "timestamp": event.timestamp,

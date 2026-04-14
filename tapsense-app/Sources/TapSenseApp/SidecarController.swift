@@ -175,9 +175,9 @@ final class SidecarController: NSObject {
             let profile = event.profile ?? mode.rawValue
             let sensitivity = event.sensitivity ?? self.sensitivity.rawValue
             lastEventText = "Started (\(profile), \(sensitivity), \(simulateMode ? "simulate" : "real"))"
-        case "knock_pattern":
+        case "tap_pattern":
             let pattern = event.pattern ?? "unknown"
-            lastEventText = "Detected \(pattern) knock"
+            lastEventText = "Detected \(pattern) tap"
         case "error":
             statusText = "Error"
             lastEventText = event.message ?? "Unknown error"

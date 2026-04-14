@@ -1,7 +1,7 @@
 {
   "name": "vscode-tapsense",
   "displayName": "TapSense",
-  "description": "Detects single, double, and triple knock gestures on your MacBook via accelerometer sidecar",
+  "description": "Detects single, double, and triple tap gestures on your MacBook via accelerometer sidecar",
   "version": "0.0.1",
   "publisher": "demo",
   "engines": {
@@ -29,15 +29,15 @@
       },
       {
         "command": "tapsense.testSingle",
-        "title": "TapSense: Test Single Knock"
+        "title": "TapSense: Test Single Tap"
       },
       {
         "command": "tapsense.testDouble",
-        "title": "TapSense: Test Double Knock"
+        "title": "TapSense: Test Double Tap"
       },
       {
         "command": "tapsense.testTriple",
-        "title": "TapSense: Test Triple Knock"
+        "title": "TapSense: Test Triple Tap"
       }
     ],
     "configuration": {
@@ -70,50 +70,50 @@
           "default": false,
           "description": "Automatically start listening on extension activation."
         },
-        "tapsense.singleKnock.command": {
+        "tapsense.singleTap.command": {
           "type": "string",
           "default": "",
-          "description": "VS Code command id to run on a single knock. Can target another extension's command."
+          "description": "VS Code command id to run on a single tap. Can target another extension's command."
         },
-        "tapsense.singleKnock.args": {
+        "tapsense.singleTap.args": {
           "type": "array",
           "default": [],
-          "description": "Arguments passed to the single-knock command."
+          "description": "Arguments passed to the single-tap command."
         },
-        "tapsense.singleKnock.showNotification": {
+        "tapsense.singleTap.showNotification": {
           "type": "boolean",
           "default": true,
-          "description": "Show a VS Code notification when a single knock is detected."
+          "description": "Show a VS Code notification when a single tap is detected."
         },
-        "tapsense.doubleKnock.command": {
+        "tapsense.doubleTap.command": {
           "type": "string",
           "default": "",
-          "description": "VS Code command id to run on a double knock. Can target another extension's command."
+          "description": "VS Code command id to run on a double tap. Can target another extension's command."
         },
-        "tapsense.doubleKnock.args": {
+        "tapsense.doubleTap.args": {
           "type": "array",
           "default": [],
-          "description": "Arguments passed to the double-knock command."
+          "description": "Arguments passed to the double-tap command."
         },
-        "tapsense.doubleKnock.showNotification": {
+        "tapsense.doubleTap.showNotification": {
           "type": "boolean",
           "default": true,
-          "description": "Show a VS Code notification when a double knock is detected."
+          "description": "Show a VS Code notification when a double tap is detected."
         },
-        "tapsense.tripleKnock.command": {
+        "tapsense.tripleTap.command": {
           "type": "string",
           "default": "",
-          "description": "VS Code command id to run on a triple knock. Can target another extension's command."
+          "description": "VS Code command id to run on a triple tap. Can target another extension's command."
         },
-        "tapsense.tripleKnock.args": {
+        "tapsense.tripleTap.args": {
           "type": "array",
           "default": [],
-          "description": "Arguments passed to the triple-knock command."
+          "description": "Arguments passed to the triple-tap command."
         },
-        "tapsense.tripleKnock.showNotification": {
+        "tapsense.tripleTap.showNotification": {
           "type": "boolean",
           "default": true,
-          "description": "Show a VS Code notification when a triple knock is detected."
+          "description": "Show a VS Code notification when a triple tap is detected."
         }
       }
     }

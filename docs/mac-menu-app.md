@@ -46,7 +46,7 @@ The current menu bar app can:
 
 A VS Code extension is the right place for editor actions, but it is not the right place for system-level lifecycle control.
 
-A dedicated macOS menu bar app makes the knock system feel like a native Mac utility instead of an editor-only demo.
+A dedicated macOS menu bar app makes the tap system feel like a native Mac utility instead of an editor-only demo.
 
 ## Current architecture
 
@@ -54,7 +54,7 @@ A dedicated macOS menu bar app makes the knock system feel like a native Mac uti
 macOS menu bar app
         ↓ launches / controls
      tapsense-sidecar
-        ↓ knock events
+        ↓ tap events
    VS Code extension
 ```
 
@@ -62,7 +62,7 @@ In the current MVP:
 
 - the menu app launches the sidecar directly with `Process`
 - the menu app controls mode, sensitivity, and simulate flags through CLI arguments
-- the sidecar emits JSON events like `started`, `knock_pattern`, `error`, and `stopped`
+- the sidecar emits JSON events like `started`, `tap_pattern`, `error`, and `stopped`
 - the menu app updates its menu state based on those events
 
 ## Responsibilities
@@ -73,15 +73,15 @@ Responsibilities:
 
 - read accelerometer data
 - apply detection profiles such as palm-rest and desk
-- classify knock patterns
+- classify tap patterns
 - emit structured events
 
 ### 2. `tapsense-vscode`
 
 Responsibilities:
 
-- listen for knock events
-- map knock patterns to command ids
+- listen for tap events
+- map tap patterns to command ids
 - trigger VS Code or extension-provided actions
 - show editor notifications
 

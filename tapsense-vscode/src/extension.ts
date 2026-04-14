@@ -8,13 +8,13 @@ let sidecarProcess: cp.ChildProcess | null = null;
 let statusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
 
-type KnockPattern = "single" | "double" | "triple";
-type KnockMode = "palmRest" | "desk";
-type KnockSensitivity = "low" | "medium" | "high";
+type TapPattern = "single" | "double" | "triple";
+type TapMode = "palmRest" | "desk";
+type TapSensitivity = "low" | "medium" | "high";
 
-type KnockEvent = {
+type TapEvent = {
   type: string;
-  pattern?: KnockPattern;
+  pattern?: TapPattern;
   count?: number;
   timestamp?: number;
   message?: string;
@@ -25,8 +25,8 @@ type KnockEvent = {
 
 type SidecarLaunchOptions = {
   simulate: boolean;
-  mode: KnockMode;
-  sensitivity: KnockSensitivity;
+  mode: TapMode;
+  sensitivity: TapSensitivity;
 };
 
 export function activate(context: vscode.ExtensionContext) {
@@ -144,7 +144,7 @@ function startListening() {
     rl.on("line", (line) => {
       outputChannel.appendLine(`[sidecar] ${line}`);
       try {
-        const event = JSON.parse(line) as KnockEvent;
+        const event = JSON.parse(line) as TapEvent;
         handleEvent(event);
       } catch {
         outputChannel.appendLine(`[parse error] ${line}`);
@@ -163,8 +163,8 @@ function getSidecarLaunchOptions(): SidecarLaunchOptions {
   const config = vscode.workspace.getConfiguration("tapsense");
   return {
     simulate: config.get<boolean>("simulateMode", true),
-    mode: getEnumConfig<KnockMode>("mode", "palmRest", ["palmRest", "desk"]),
-    sensitivity: getEnumConfig<KnockSensitivity>("sensitivity", "medium", [
+    mode: getEnumConfig<TapMode>("mode", "palmRest", ["palmRest", "desk"]),
+    sensitivity: getEnumConfig<TapSensitivity>("sensitivity", "medium", [
       "low",
       "medium",
       "high",
@@ -184,9 +184,9 @@ function getEnumConfig<T extends string>(
   return fallback;
 }
 
-function handleEvent(event: KnockEvent) {
+function handleEvent(event: TapEvent) {
   switch (event.type) {
-    case "knock_pattern":
+    case "tap_pattern":
       if (event.pattern) {
         void triggerPattern(event.pattern, false, event);
       }
@@ -206,23 +206,23 @@ function handleEvent(event: KnockEvent) {
 }
 
 async function triggerPattern(
-  pattern: KnockPattern,
+  pattern: TapPattern,
   manualTest = false,
-  _event?: KnockEvent,
+  _event?: TapEvent,
 ) {
   const config = vscode.workspace.getConfiguration("tapsense");
-  const shouldNotify = config.get<boolean>(`${pattern}Knock.showNotification`, true);
-  const command = config.get<string>(`${pattern}Knock.command`, "").trim();
-  const commandArgs = config.get<unknown[]>(`${pattern}Knock.args`, []);
+  const shouldNotify = config.get<boolean>(`${pattern}Tap.showNotification`, true);
+  const command = config.get<string>(`${pattern}Tap.command`, "").trim();
+  const commandArgs = config.get<unknown[]>(`${pattern}Tap.args`, []);
 
   outputChannel.appendLine(
-    `>>> ${capitalize(pattern)} knock detected${manualTest ? " (test)" : ""}`,
+    `>>> ${capitalize(pattern)} tap detected${manualTest ? " (test)" : ""}`,
   );
 
   if (shouldNotify) {
     const suffix = manualTest ? " (test)" : "";
     void vscode.window.showInformationMessage(
-      `${capitalize(pattern)} knock detected!${suffix}`,
+      `${capitalize(pattern)} tap detected!${suffix}`,
     );
   }
 
@@ -232,14 +232,14 @@ async function triggerPattern(
 
   try {
     await vscode.commands.executeCommand(command, ...(commandArgs ?? []));
-    outputChannel.appendLine(`Executed command for ${pattern} knock: ${command}`);
+    outputChannel.appendLine(`Executed command for ${pattern} tap: ${command}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     outputChannel.appendLine(
-      `Command execution failed for ${pattern} knock (${command}): ${message}`,
+      `Command execution failed for ${pattern} tap (${command}): ${message}`,
     );
     void vscode.window.showErrorMessage(
-      `TapSense action failed for ${pattern} knock: ${message}`,
+      `TapSense action failed for ${pattern} tap: ${message}`,
     );
   }
 }

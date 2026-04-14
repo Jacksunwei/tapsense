@@ -1,6 +1,6 @@
 import Foundation
 
-struct KnockEvent {
+struct TapEvent {
     let count: Int
     let timestamp: TimeInterval
 
@@ -16,16 +16,16 @@ struct KnockEvent {
     }
 }
 
-final class KnockDetector {
+final class TapDetector {
     private let magnitudeThreshold: Double
     private let maxGapMs: Double
     private let minGapMs: Double
     private let cooldownMs: Double
-    private let maxKnocksPerPattern: Int
+    private let maxTapsPerPattern: Int
     private let confirmSamples: Int
     private let releaseRatio: Double
 
-    private var knockTimes: [TimeInterval] = []
+    private var tapTimes: [TimeInterval] = []
     private var lastEmitTime: TimeInterval = 0
 
     // High-pass filter state (per-axis gravity removal)
@@ -37,14 +37,14 @@ final class KnockDetector {
 
     // Peak confirmation state
     private var consecutiveAbove: Int = 0
-    private var knockFired: Bool = false
+    private var tapFired: Bool = false
 
     init(
         magnitudeThreshold: Double = 0.5,
         minGapMs: Double = 50,
         maxGapMs: Double = 400,
         cooldownMs: Double = 1000,
-        maxKnocksPerPattern: Int = 3,
+        maxTapsPerPattern: Int = 3,
         confirmSamples: Int = 2,
         releaseRatio: Double = 0.5
     ) {
@@ -52,23 +52,23 @@ final class KnockDetector {
         self.minGapMs = minGapMs
         self.maxGapMs = maxGapMs
         self.cooldownMs = cooldownMs
-        self.maxKnocksPerPattern = maxKnocksPerPattern
+        self.maxTapsPerPattern = maxTapsPerPattern
         self.confirmSamples = confirmSamples
         self.releaseRatio = releaseRatio
         self.lastEmitTime = -(cooldownMs / 1000)
     }
 
-    convenience init(profile: DetectorProfile, maxKnocksPerPattern: Int = 3) {
+    convenience init(profile: DetectorProfile, maxTapsPerPattern: Int = 3) {
         self.init(
             magnitudeThreshold: profile.magnitudeThreshold,
             minGapMs: profile.minGapMs,
             maxGapMs: profile.maxGapMs,
             cooldownMs: profile.cooldownMs,
-            maxKnocksPerPattern: maxKnocksPerPattern
+            maxTapsPerPattern: maxTapsPerPattern
         )
     }
 
-    func process(_ reading: AccelerometerReading) -> KnockEvent? {
+    func process(_ reading: AccelerometerReading) -> TapEvent? {
         let now = reading.timestamp
 
         if let event = finalizeIfTimedOut(now: now) {
@@ -82,18 +82,18 @@ final class KnockDetector {
             consecutiveAbove += 1
         } else if magnitude < releaseThreshold {
             consecutiveAbove = 0
-            knockFired = false
+            tapFired = false
             return nil
         } else {
             return nil
         }
 
-        guard consecutiveAbove >= confirmSamples && !knockFired else {
+        guard consecutiveAbove >= confirmSamples && !tapFired else {
             return nil
         }
 
-        knockFired = true
-        return registerKnock(at: now)
+        tapFired = true
+        return registerTap(at: now)
     }
 
     private func filteredMagnitude(_ reading: AccelerometerReading) -> Double {
@@ -116,26 +116,26 @@ final class KnockDetector {
         return sqrt(ax * ax + ay * ay + az * az)
     }
 
-    private func finalizeIfTimedOut(now: TimeInterval) -> KnockEvent? {
-        guard let lastKnockTime = knockTimes.last else {
+    private func finalizeIfTimedOut(now: TimeInterval) -> TapEvent? {
+        guard let lastTapTime = tapTimes.last else {
             return nil
         }
 
-        let elapsedMs = (now - lastKnockTime) * 1000
+        let elapsedMs = (now - lastTapTime) * 1000
         guard elapsedMs > maxGapMs else {
             return nil
         }
 
-        return emitCurrentPattern(timestamp: lastKnockTime)
+        return emitCurrentPattern(timestamp: lastTapTime)
     }
 
-    private func registerKnock(at now: TimeInterval) -> KnockEvent? {
+    private func registerTap(at now: TimeInterval) -> TapEvent? {
         let sinceLastEmitMs = (now - lastEmitTime) * 1000
-        if knockTimes.isEmpty && sinceLastEmitMs < cooldownMs {
+        if tapTimes.isEmpty && sinceLastEmitMs < cooldownMs {
             return nil
         }
 
-        if let previous = knockTimes.last {
+        if let previous = tapTimes.last {
             let gapMs = (now - previous) * 1000
 
             if gapMs < minGapMs {
@@ -144,28 +144,28 @@ final class KnockDetector {
 
             if gapMs > maxGapMs {
                 let event = emitCurrentPattern(timestamp: previous)
-                knockTimes = [now]
+                tapTimes = [now]
                 return event
             }
         }
 
-        knockTimes.append(now)
+        tapTimes.append(now)
 
-        if knockTimes.count >= maxKnocksPerPattern {
+        if tapTimes.count >= maxTapsPerPattern {
             return emitCurrentPattern(timestamp: now)
         }
 
         return nil
     }
 
-    private func emitCurrentPattern(timestamp: TimeInterval) -> KnockEvent? {
-        guard !knockTimes.isEmpty else {
+    private func emitCurrentPattern(timestamp: TimeInterval) -> TapEvent? {
+        guard !tapTimes.isEmpty else {
             return nil
         }
 
-        let count = min(knockTimes.count, maxKnocksPerPattern)
-        knockTimes.removeAll(keepingCapacity: true)
+        let count = min(tapTimes.count, maxTapsPerPattern)
+        tapTimes.removeAll(keepingCapacity: true)
         lastEmitTime = timestamp
-        return KnockEvent(count: count, timestamp: timestamp)
+        return TapEvent(count: count, timestamp: timestamp)
     }
 }

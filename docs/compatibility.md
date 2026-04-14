@@ -2,7 +2,7 @@
 
 This matrix is intentionally conservative.
 
-The hidden accelerometer / IMU path used by projects like Knock is not documented by Apple as a public macOS API, so compatibility has to be inferred from reverse-engineered projects and public claims from apps using the same path.
+The hidden accelerometer / IMU path used by projects like Tap is not documented by Apple as a public macOS API, so compatibility has to be inferred from reverse-engineered projects and public claims from apps using the same path.
 
 ## Summary
 
@@ -31,10 +31,10 @@ Source:
 
 ### Product claim from the app ecosystem
 
-The Knock app markets itself as controlling your Mac with taps and public reverse-engineering references describe it as using the built-in accelerometer in Apple Silicon MacBooks.
+The Tap app markets itself as controlling your Mac with taps and public reverse-engineering references describe it as using the built-in accelerometer in Apple Silicon MacBooks.
 
 Source:
-- TapSense: https://www.tryknock.app/
+- TapSense: https://www.trytap.app/
 
 ## Important caveat
 

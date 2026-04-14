@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The sidecar is a native macOS executable that turns sensor samples into higher-level knock events.
+The sidecar is a native macOS executable that turns sensor samples into higher-level tap events.
 
 It exists because low-level macOS hardware access is a poor fit for a normal VS Code extension runtime.
 
@@ -10,7 +10,7 @@ It exists because low-level macOS hardware access is a poor fit for a normal VS 
 
 - `tapsense-sidecar/Sources/TapSenseSidecar/main.swift`
 - `tapsense-sidecar/Sources/TapSenseSidecar/Accelerometer.swift`
-- `tapsense-sidecar/Sources/TapSenseSidecar/KnockDetector.swift`
+- `tapsense-sidecar/Sources/TapSenseSidecar/TapDetector.swift`
 - `tapsense-sidecar/Sources/TapSenseSidecar/Simulator.swift`
 
 ## Internal structure
@@ -32,7 +32,7 @@ It:
 
 - runs a timer
 - emits mostly stable readings
-- injects synthetic spike patterns for one, two, or three knocks
+- injects synthetic spike patterns for one, two, or three taps
 - cycles through repeated single, double, and triple patterns
 - uses synthetic timestamps so the demo stays stable even if timer scheduling jitters
 
@@ -63,9 +63,9 @@ The current parser assumes HID reports where:
 
 That assumption matches public reverse-engineering notes, but still needs verification on the target machine.
 
-## Knock detection algorithm
+## Tap detection algorithm
 
-`KnockDetector` is intentionally simple.
+`TapDetector` is intentionally simple.
 
 ### Input
 
@@ -80,10 +80,10 @@ One `AccelerometerReading` at a time:
 
 1. compute vector magnitude
 2. compare against a threshold
-3. treat each rising-edge threshold crossing as one knock
-4. group nearby knocks into a sequence using min and max timing gaps
-5. classify the sequence as single, double, or triple knock
-6. emit a `knock_pattern` event with `pattern` and `count`
+3. treat each rising-edge threshold crossing as one tap
+4. group nearby taps into a sequence using min and max timing gaps
+5. classify the sequence as single, double, or triple tap
+6. emit a `tap_pattern` event with `pattern` and `count`
 7. apply a cooldown to avoid repeated firing
 
 This is good enough for a prototype, but not robust enough for production.
@@ -96,9 +96,9 @@ Examples:
 
 ```json
 {"type":"started","mode":"simulate"}
-{"type":"knock_pattern","pattern":"single","count":1,"timestamp":0.01}
-{"type":"knock_pattern","pattern":"double","count":2,"timestamp":1.95}
-{"type":"knock_pattern","pattern":"triple","count":3,"timestamp":3.90}
+{"type":"tap_pattern","pattern":"single","count":1,"timestamp":0.01}
+{"type":"tap_pattern","pattern":"double","count":2,"timestamp":1.95}
+{"type":"tap_pattern","pattern":"triple","count":3,"timestamp":3.90}
 {"type":"error","message":"Failed to start accelerometer. Use --simulate mode."}
 ```
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The extension is the editor-facing half of the prototype. It does not detect knocks itself. Instead, it launches the sidecar and reacts to events.
+The extension is the editor-facing half of the prototype. It does not detect taps itself. Instead, it launches the sidecar and reacts to events.
 
 ## Main file
 
@@ -14,9 +14,9 @@ The extension contributes five commands:
 
 - `TapSense: Start Listening`
 - `TapSense: Stop Listening`
-- `TapSense: Test Single Knock`
-- `TapSense: Test Double Knock`
-- `TapSense: Test Triple Knock`
+- `TapSense: Test Single Tap`
+- `TapSense: Test Double Tap`
+- `TapSense: Test Triple Tap`
 
 It can also auto-start after activation when `tapsense.autoStart` is enabled.
 
@@ -60,7 +60,7 @@ Each stdout line is parsed as JSON and dispatched by `type`.
 Handled event types:
 
 - `started`
-- `knock_pattern`
+- `tap_pattern`
 - `error`
 - `stopped`
 
@@ -79,7 +79,7 @@ A status bar item shows whether listening is active.
 
 ### Notifications
 
-When the extension receives a `knock_pattern` event, it resolves the matching settings bucket for `single`, `double`, or `triple` tapsense.
+When the extension receives a `tap_pattern` event, it resolves the matching settings bucket for `single`, `double`, or `triple` tapsense.
 
 For each pattern it can:
 
@@ -103,9 +103,9 @@ So a working settings example is:
 
 ```json
 {
-  "tapsense.doubleKnock.command": "expandLineSelection",
-  "tapsense.doubleKnock.args": [],
-  "tapsense.doubleKnock.showNotification": true
+  "tapsense.doubleTap.command": "expandLineSelection",
+  "tapsense.doubleTap.args": [],
+  "tapsense.doubleTap.showNotification": true
 }
 ```
 
@@ -115,9 +115,9 @@ If another extension exposes a command id such as `someExtension.someCommand`, y
 
 ```json
 {
-  "tapsense.tripleKnock.command": "someExtension.someCommand",
-  "tapsense.tripleKnock.args": ["example"],
-  "tapsense.tripleKnock.showNotification": true
+  "tapsense.tripleTap.command": "someExtension.someCommand",
+  "tapsense.tripleTap.args": ["example"],
+  "tapsense.tripleTap.showNotification": true
 }
 ```
 

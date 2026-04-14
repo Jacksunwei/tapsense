@@ -6,7 +6,7 @@ This folder explains how the prototype is designed, how the two subprojects talk
 
 - `architecture.md` - system-level overview of the prototype
 - `tapsense-vscode.md` - extension design, activation flow, and event handling
-- `tapsense-sidecar.md` - sidecar design, sensor abstraction, and knock detection
+- `tapsense-sidecar.md` - sidecar design, sensor abstraction, and tap detection
 - `compatibility.md` - provisional hardware compatibility matrix for this private sensor path
 - `vscode-compatible-ides.md` - how to configure command mapping in VS Code-compatible IDEs
 - `tapsense-app.md` - proposed architecture for a native macOS menu bar controller app
@@ -17,6 +17,6 @@ This folder explains how the prototype is designed, how the two subprojects talk
 The prototype is split into two parts:
 
 1. a VS Code extension that handles editor UX
-2. a native macOS sidecar that produces knock events
+2. a native macOS sidecar that produces tap events
 
 The sidecar emits newline-delimited JSON on stdout. The extension reads those lines and reacts to them.
