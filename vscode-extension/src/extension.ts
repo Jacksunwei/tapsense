@@ -9,6 +9,8 @@ let statusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
 
 type KnockPattern = "single" | "double" | "triple";
+type KnockMode = "palmRest" | "desk";
+type KnockSensitivity = "low" | "medium" | "high";
 
 type KnockEvent = {
   type: string;
@@ -17,6 +19,14 @@ type KnockEvent = {
   timestamp?: number;
   message?: string;
   mode?: string;
+  profile?: string;
+  sensitivity?: string;
+};
+
+type SidecarLaunchOptions = {
+  simulate: boolean;
+  mode: KnockMode;
+  sensitivity: KnockSensitivity;
 };
 
 export function activate(context: vscode.ExtensionContext) {
@@ -69,11 +79,15 @@ function startListening() {
   }
 
   const binary = getSidecarPath();
-  const config = vscode.workspace.getConfiguration("knock");
-  const simulate = config.get<boolean>("simulateMode", true);
+  const launchOptions = getSidecarLaunchOptions();
 
-  const args: string[] = [];
-  if (simulate) {
+  const args: string[] = [
+    "--mode",
+    launchOptions.mode,
+    "--sensitivity",
+    launchOptions.sensitivity,
+  ];
+  if (launchOptions.simulate) {
     args.push("--simulate");
   }
 
@@ -87,9 +101,10 @@ function startListening() {
   }
 
   try {
-    sidecarProcess = cp.spawn(binary, args, {
+    const spawned = cp.spawn(binary, args, {
       stdio: ["ignore", "pipe", "pipe"],
     });
+    sidecarProcess = spawned;
   } catch (err) {
     vscode.window.showErrorMessage(
       `Failed to start knock sidecar: ${err}. Build it first with: cd knock-sidecar && swift build -c release`,
@@ -97,30 +112,35 @@ function startListening() {
     return;
   }
 
-  sidecarProcess.on("error", (err) => {
+  const processForHandlers = sidecarProcess;
+
+  processForHandlers.on("error", (err) => {
     outputChannel.appendLine(`Sidecar error: ${err.message}`);
     vscode.window.showErrorMessage(
       `Knock sidecar error: ${err.message}. Make sure the binary is built.`,
     );
-    cleanup();
+    cleanup(processForHandlers);
   });
 
-  sidecarProcess.on("exit", (code) => {
+  processForHandlers.on("exit", (code, signal) => {
     outputChannel.appendLine(`Sidecar exited with code ${code}`);
-    cleanup();
+    if (signal) {
+      outputChannel.appendLine(`Sidecar exit signal: ${signal}`);
+    }
+    cleanup(processForHandlers);
   });
 
-  if (sidecarProcess.stderr) {
+  if (processForHandlers.stderr) {
     const stderrRl = readline.createInterface({
-      input: sidecarProcess.stderr,
+      input: processForHandlers.stderr,
     });
     stderrRl.on("line", (line) => {
       outputChannel.appendLine(`[sidecar stderr] ${line}`);
     });
   }
 
-  if (sidecarProcess.stdout) {
-    const rl = readline.createInterface({ input: sidecarProcess.stdout });
+  if (processForHandlers.stdout) {
+    const rl = readline.createInterface({ input: processForHandlers.stdout });
     rl.on("line", (line) => {
       outputChannel.appendLine(`[sidecar] ${line}`);
       try {
@@ -135,8 +155,33 @@ function startListening() {
   statusBarItem.text = "$(pulse) Knock: Listening";
   statusBarItem.command = "knock.stop";
   vscode.window.showInformationMessage(
-    `Knock detector started${simulate ? " (simulate mode)" : ""}.`,
+    `Knock detector started${launchOptions.simulate ? " (simulate mode)" : ""}.`,
   );
+}
+
+function getSidecarLaunchOptions(): SidecarLaunchOptions {
+  const config = vscode.workspace.getConfiguration("knock");
+  return {
+    simulate: config.get<boolean>("simulateMode", true),
+    mode: getEnumConfig<KnockMode>("mode", "palmRest", ["palmRest", "desk"]),
+    sensitivity: getEnumConfig<KnockSensitivity>("sensitivity", "medium", [
+      "low",
+      "medium",
+      "high",
+    ]),
+  };
+}
+
+function getEnumConfig<T extends string>(
+  key: string,
+  fallback: T,
+  allowed: readonly T[],
+): T {
+  const value = vscode.workspace.getConfiguration("knock").get<string>(key);
+  if (value && allowed.includes(value as T)) {
+    return value as T;
+  }
+  return fallback;
 }
 
 function handleEvent(event: KnockEvent) {
@@ -213,7 +258,10 @@ function stopListening() {
   vscode.window.showInformationMessage("Knock detector stopped.");
 }
 
-function cleanup() {
+function cleanup(expectedProcess?: cp.ChildProcess) {
+  if (expectedProcess && sidecarProcess !== expectedProcess) {
+    return;
+  }
   sidecarProcess = null;
   statusBarItem.text = "$(pulse) Knock: Off";
   statusBarItem.command = "knock.start";

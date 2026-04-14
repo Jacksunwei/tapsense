@@ -17,11 +17,22 @@ protocol AccelerometerSource {
 final class IOKitAccelerometer: AccelerometerSource {
     private var manager: IOHIDManager?
     private var device: IOHIDDevice?
-    private var reportBuffer = [UInt8](repeating: 0, count: 64)
     private var callback: ((AccelerometerReading) -> Void)?
-    private let queue = DispatchQueue(label: "accelerometer.hid")
+    private static let reportBufferLength = 64
+    private let reportBuffer: UnsafeMutablePointer<UInt8>
     private let usagePage: Int = 0xFF00
     private let usage: Int = 0x03
+
+    init() {
+        reportBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Self.reportBufferLength)
+        reportBuffer.initialize(repeating: 0, count: Self.reportBufferLength)
+    }
+
+    deinit {
+        stop()
+        reportBuffer.deinitialize(count: Self.reportBufferLength)
+        reportBuffer.deallocate()
+    }
 
     func start(callback: @escaping (AccelerometerReading) -> Void) -> Bool {
         self.callback = callback
@@ -91,8 +102,8 @@ final class IOKitAccelerometer: AccelerometerSource {
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
         IOHIDDeviceRegisterInputReportCallback(
             device,
-            &reportBuffer,
-            reportBuffer.count,
+            reportBuffer,
+            Self.reportBufferLength,
             inputReportCallback,
             selfPtr
         )

@@ -259,6 +259,8 @@ Core settings:
 
 - `knock.sidecarPath`: optional explicit path to the sidecar binary
 - `knock.simulateMode`: run sidecar in simulation mode, default `true`
+- `knock.mode`: sidecar detection profile, `palmRest` or `desk`, default `palmRest`
+- `knock.sensitivity`: sidecar detection sensitivity, `low`, `medium`, or `high`, default `medium`
 - `knock.autoStart`: auto-start listener after activation, default `false`
 
 Pattern action settings:

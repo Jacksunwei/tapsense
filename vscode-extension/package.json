@@ -53,6 +53,18 @@
           "default": true,
           "description": "Run sidecar in --simulate mode (no real accelerometer needed)."
         },
+        "knock.mode": {
+          "type": "string",
+          "enum": ["palmRest", "desk"],
+          "default": "palmRest",
+          "description": "Detection profile to pass to the sidecar."
+        },
+        "knock.sensitivity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "default": "medium",
+          "description": "Detection sensitivity to pass to the sidecar."
+        },
         "knock.autoStart": {
           "type": "boolean",
           "default": false,
@@ -109,7 +121,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts",
+    "lint": "tsc --noEmit -p ./",
     "build:sidecar": "cd ../knock-sidecar && swift build -c release"
   },
   "devDependencies": {

@@ -6,6 +6,9 @@ final class SidecarController: NSObject {
     private(set) var isRunning = false
     private(set) var statusText = "Stopped"
     private(set) var lastEventText = "No events yet"
+    private var stdoutBuffer = ""
+    private var stderrBuffer = ""
+    private let jsonDecoder = JSONDecoder()
 
     var simulateMode = true
     var mode: MenuKnockMode = .palmRest
@@ -43,27 +46,22 @@ final class SidecarController: NSObject {
         stdout.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
             guard !data.isEmpty else { return }
-            self?.consumeOutput(data)
+            DispatchQueue.main.async {
+                self?.consumeOutput(data)
+            }
         }
 
         stderr.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
             guard !data.isEmpty else { return }
-            if let text = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
-               !text.isEmpty {
-                DispatchQueue.main.async {
-                    self?.lastEventText = text
-                    self?.onStateChange?()
-                }
+            DispatchQueue.main.async {
+                self?.consumeDiagnostics(data)
             }
         }
 
-        process.terminationHandler = { [weak self] _ in
+        process.terminationHandler = { [weak self] terminatedProcess in
             DispatchQueue.main.async {
-                self?.process = nil
-                self?.isRunning = false
-                self?.statusText = "Stopped"
-                self?.onStateChange?()
+                self?.finishTerminatedProcess(terminatedProcess)
             }
         }
 
@@ -75,6 +73,7 @@ final class SidecarController: NSObject {
             self.lastEventText = "Launching sidecar"
             onStateChange?()
         } catch {
+            clearPipeHandlers(for: process)
             statusText = "Start failed"
             lastEventText = error.localizedDescription
             onStateChange?()
@@ -82,7 +81,21 @@ final class SidecarController: NSObject {
     }
 
     func stop() {
+        clearPipeHandlers(for: process)
         process?.interrupt()
+        process = nil
+        isRunning = false
+        statusText = "Stopped"
+        onStateChange?()
+    }
+
+    private func finishTerminatedProcess(_ terminatedProcess: Process) {
+        guard process === terminatedProcess else {
+            return
+        }
+
+        flushOutputBuffers()
+        clearPipeHandlers(for: terminatedProcess)
         process = nil
         isRunning = false
         statusText = "Stopped"
@@ -99,14 +112,59 @@ final class SidecarController: NSObject {
 
     private func consumeOutput(_ data: Data) {
         guard let text = String(data: data, encoding: .utf8) else { return }
-        let lines = text.split(whereSeparator: \.isNewline)
-        for line in lines {
-            guard let jsonData = String(line).data(using: .utf8) else { continue }
-            if let event = try? JSONDecoder().decode(SidecarEvent.self, from: jsonData) {
-                DispatchQueue.main.async {
-                    self.handle(event: event)
-                }
-            }
+        stdoutBuffer += text
+
+        while let newlineIndex = stdoutBuffer.firstIndex(where: \.isNewline) {
+            let line = String(stdoutBuffer[..<newlineIndex])
+            stdoutBuffer.removeSubrange(...newlineIndex)
+            handleOutputLine(line)
+        }
+    }
+
+    private func consumeDiagnostics(_ data: Data) {
+        guard let text = String(data: data, encoding: .utf8) else { return }
+        stderrBuffer += text
+
+        while let newlineIndex = stderrBuffer.firstIndex(where: \.isNewline) {
+            let line = String(stderrBuffer[..<newlineIndex])
+            stderrBuffer.removeSubrange(...newlineIndex)
+            handleDiagnosticLine(line)
+        }
+    }
+
+    private func flushOutputBuffers() {
+        if !stdoutBuffer.isEmpty {
+            handleOutputLine(stdoutBuffer)
+            stdoutBuffer.removeAll(keepingCapacity: true)
+        }
+
+        if !stderrBuffer.isEmpty {
+            handleDiagnosticLine(stderrBuffer)
+            stderrBuffer.removeAll(keepingCapacity: true)
+        }
+    }
+
+    private func handleOutputLine(_ line: String) {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let jsonData = trimmed.data(using: .utf8) else { return }
+        if let event = try? jsonDecoder.decode(SidecarEvent.self, from: jsonData) {
+            handle(event: event)
+        }
+    }
+
+    private func handleDiagnosticLine(_ line: String) {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        lastEventText = trimmed
+        onStateChange?()
+    }
+
+    private func clearPipeHandlers(for process: Process?) {
+        if let stdout = process?.standardOutput as? Pipe {
+            stdout.fileHandleForReading.readabilityHandler = nil
+        }
+        if let stderr = process?.standardError as? Pipe {
+            stderr.fileHandleForReading.readabilityHandler = nil
         }
     }
 

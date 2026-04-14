@@ -10,13 +10,13 @@ This prototype intentionally separates hardware access from VS Code UX.
 - launch and stop the sidecar process
 - parse event lines from the sidecar
 - show notifications inside VS Code
-- expose user settings such as simulate mode and custom sidecar path
+- expose user settings such as simulate mode, sidecar path, detection mode, and sensitivity
 
 ### Sidecar responsibilities
 
 - talk to the local sensor source
 - normalize raw readings into a simple stream
-- detect double-knock gestures
+- detect single-, double-, and triple-knock gestures
 - emit machine-readable events over stdout
 
 This split keeps the extension simple and makes the sensor code replaceable.
@@ -28,7 +28,7 @@ Physical knock or simulated knock
         ↓
 knock-sidecar sensor source
         ↓
-KnockDetector classifies double-knock
+KnockDetector classifies knock pattern
         ↓
 stdout JSON event: {"type":"knock_pattern","pattern":"double","count":2}
         ↓

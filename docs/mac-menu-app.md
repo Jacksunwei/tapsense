@@ -36,7 +36,7 @@ The current menu bar app can:
 
 ## Current limitations
 
-- it runs as an executable, not a signed `.app` bundle yet
+- the repo can assemble a local `.app` bundle, but it is not signed or notarized yet
 - it still starts the sidecar as a child process
 - it does not yet expose a socket or XPC control plane
 - VS Code and the menu app do not yet share a single long-running sidecar instance

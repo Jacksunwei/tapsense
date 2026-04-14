@@ -26,7 +26,7 @@ When listening starts, the extension:
 
 1. resolves the sidecar binary path
 2. reads the extension settings
-3. optionally adds `--simulate`
+3. passes `--mode`, `--sensitivity`, and optionally `--simulate`
 4. spawns the sidecar with Node's `child_process.spawn`
 5. attaches line readers to stdout and stderr
 6. updates the VS Code status bar
@@ -39,6 +39,15 @@ Resolution order:
 2. default repo-local path: `../knock-sidecar/.build/release/KnockSidecar`
 
 This makes the monorepo easy to run locally without extra configuration.
+
+## Sidecar profile settings
+
+The extension exposes the same profile knobs as the menu app:
+
+- `knock.mode`: `palmRest` or `desk`
+- `knock.sensitivity`: `low`, `medium`, or `high`
+
+Those settings are passed directly to the sidecar as CLI flags.
 
 ## Event handling
 
@@ -135,7 +144,6 @@ If the sidecar cannot be started or crashes:
 ## Future extension improvements
 
 1. show richer notifications with event metadata
-2. expose sensitivity settings in the extension UI
-3. add validation or discovery helpers for configured command ids
-4. support background restart when the sidecar exits unexpectedly
-5. package the sidecar automatically during extension install
+2. add validation or discovery helpers for configured command ids
+3. support background restart when the sidecar exits unexpectedly
+4. package the sidecar automatically during extension install
