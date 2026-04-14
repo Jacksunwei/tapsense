@@ -1,63 +1,120 @@
 import Foundation
 
+struct KnockEvent {
+    let count: Int
+    let timestamp: TimeInterval
+
+    var pattern: String {
+        switch count {
+        case 1:
+            return "single"
+        case 2:
+            return "double"
+        default:
+            return "triple"
+        }
+    }
+}
+
 final class KnockDetector {
     private let magnitudeThreshold: Double
     private let maxGapMs: Double
     private let minGapMs: Double
     private let cooldownMs: Double
+    private let maxKnocksPerPattern: Int
 
-    private var lastKnockTime: TimeInterval = 0
-    private var waitingForSecond = false
+    private var knockTimes: [TimeInterval] = []
     private var lastEmitTime: TimeInterval = 0
+    private var isAboveThreshold = false
 
     init(
         magnitudeThreshold: Double = 2.0,
         minGapMs: Double = 50,
         maxGapMs: Double = 400,
-        cooldownMs: Double = 1000
+        cooldownMs: Double = 1000,
+        maxKnocksPerPattern: Int = 3
     ) {
         self.magnitudeThreshold = magnitudeThreshold
         self.minGapMs = minGapMs
         self.maxGapMs = maxGapMs
         self.cooldownMs = cooldownMs
+        self.maxKnocksPerPattern = maxKnocksPerPattern
+        self.lastEmitTime = -(cooldownMs / 1000)
     }
 
-    func process(_ reading: AccelerometerReading) -> Bool {
-        let magnitude = sqrt(reading.x * reading.x + reading.y * reading.y + reading.z * reading.z)
-
-        guard magnitude > magnitudeThreshold else {
-            if waitingForSecond {
-                let elapsed = (reading.timestamp - lastKnockTime) * 1000
-                if elapsed > maxGapMs {
-                    waitingForSecond = false
-                }
-            }
-            return false
-        }
-
+    func process(_ reading: AccelerometerReading) -> KnockEvent? {
         let now = reading.timestamp
 
-        if !waitingForSecond {
-            lastKnockTime = now
-            waitingForSecond = true
-            return false
+        if let event = finalizeIfTimedOut(now: now) {
+            return event
         }
 
-        let gapMs = (now - lastKnockTime) * 1000
+        let magnitude = sqrt(reading.x * reading.x + reading.y * reading.y + reading.z * reading.z)
+        let isCurrentlyAbove = magnitude > magnitudeThreshold
 
-        guard gapMs >= minGapMs && gapMs <= maxGapMs else {
-            lastKnockTime = now
-            return false
+        defer { isAboveThreshold = isCurrentlyAbove }
+
+        guard isCurrentlyAbove else {
+            return nil
         }
 
-        let sinceLast = (now - lastEmitTime) * 1000
-        guard sinceLast >= cooldownMs else {
-            waitingForSecond = false
-            return false
+        guard !isAboveThreshold else {
+            return nil
         }
 
-        waitingForSecond = false
-        lastEmitTime = now
-        return true
+        return registerKnock(at: now)
+    }
+
+    private func finalizeIfTimedOut(now: TimeInterval) -> KnockEvent? {
+        guard let lastKnockTime = knockTimes.last else {
+            return nil
+        }
+
+        let elapsedMs = (now - lastKnockTime) * 1000
+        guard elapsedMs > maxGapMs else {
+            return nil
+        }
+
+        return emitCurrentPattern(timestamp: lastKnockTime)
+    }
+
+    private func registerKnock(at now: TimeInterval) -> KnockEvent? {
+        let sinceLastEmitMs = (now - lastEmitTime) * 1000
+        if knockTimes.isEmpty && sinceLastEmitMs < cooldownMs {
+            return nil
+        }
+
+        if let previous = knockTimes.last {
+            let gapMs = (now - previous) * 1000
+
+            if gapMs < minGapMs {
+                return nil
+            }
+
+            if gapMs > maxGapMs {
+                let event = emitCurrentPattern(timestamp: previous)
+                knockTimes = [now]
+                return event
+            }
+        }
+
+        knockTimes.append(now)
+
+        if knockTimes.count >= maxKnocksPerPattern {
+            return emitCurrentPattern(timestamp: now)
+        }
+
+        return nil
+    }
+
+    private func emitCurrentPattern(timestamp: TimeInterval) -> KnockEvent? {
+        guard !knockTimes.isEmpty else {
+            return nil
+        }
+
+        let count = min(knockTimes.count, maxKnocksPerPattern)
+        knockTimes.removeAll(keepingCapacity: true)
+        lastEmitTime = timestamp
+        return KnockEvent(count: count, timestamp: timestamp)
     }
 }

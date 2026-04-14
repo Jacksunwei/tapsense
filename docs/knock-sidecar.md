@@ -32,8 +32,9 @@ It:
 
 - runs a timer
 - emits mostly stable readings
-- injects two short spikes separated by about 150ms
-- produces a repeated synthetic double-knock every few seconds
+- injects synthetic spike patterns for one, two, or three knocks
+- cycles through repeated single, double, and triple patterns
+- uses synthetic timestamps so the demo stays stable even if timer scheduling jitters
 
 This lets us verify the full pipeline without depending on private hardware APIs.
 
@@ -79,10 +80,11 @@ One `AccelerometerReading` at a time:
 
 1. compute vector magnitude
 2. compare against a threshold
-3. treat the first threshold crossing as knock one
-4. wait for a second threshold crossing within a min/max time window
-5. emit one `double_knock` event
-6. apply a cooldown to avoid repeated firing
+3. treat each rising-edge threshold crossing as one knock
+4. group nearby knocks into a sequence using min and max timing gaps
+5. classify the sequence as single, double, or triple knock
+6. emit a `knock_pattern` event with `pattern` and `count`
+7. apply a cooldown to avoid repeated firing
 
 This is good enough for a prototype, but not robust enough for production.
 
@@ -94,7 +96,9 @@ Examples:
 
 ```json
 {"type":"started","mode":"simulate"}
-{"type":"double_knock","timestamp":254322.25}
+{"type":"knock_pattern","pattern":"single","count":1,"timestamp":0.01}
+{"type":"knock_pattern","pattern":"double","count":2,"timestamp":1.95}
+{"type":"knock_pattern","pattern":"triple","count":3,"timestamp":3.90}
 {"type":"error","message":"Failed to start accelerometer. Use --simulate mode."}
 ```
 

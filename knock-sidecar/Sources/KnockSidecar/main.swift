@@ -21,11 +21,12 @@ if simulate {
 let detector = KnockDetector()
 
 let started = source.start { reading in
-    let detected = detector.process(reading)
-    if detected {
+    if let event = detector.process(reading) {
         emitJSON([
-            "type": "double_knock",
-            "timestamp": reading.timestamp,
+            "type": "knock_pattern",
+            "pattern": event.pattern,
+            "count": event.count,
+            "timestamp": event.timestamp,
         ])
     }
 }

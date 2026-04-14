@@ -8,6 +8,17 @@ let sidecarProcess: cp.ChildProcess | null = null;
 let statusBarItem: vscode.StatusBarItem;
 let outputChannel: vscode.OutputChannel;
 
+type KnockPattern = "single" | "double" | "triple";
+
+type KnockEvent = {
+  type: string;
+  pattern?: KnockPattern;
+  count?: number;
+  timestamp?: number;
+  message?: string;
+  mode?: string;
+};
+
 export function activate(context: vscode.ExtensionContext) {
   outputChannel = vscode.window.createOutputChannel("Knock Detector");
 
@@ -23,9 +34,15 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("knock.start", startListening),
     vscode.commands.registerCommand("knock.stop", stopListening),
-    vscode.commands.registerCommand("knock.test", () => {
-      vscode.window.showInformationMessage("Knock knock detected! (test)");
-    }),
+    vscode.commands.registerCommand("knock.testSingle", () =>
+      triggerPattern("single", true),
+    ),
+    vscode.commands.registerCommand("knock.testDouble", () =>
+      triggerPattern("double", true),
+    ),
+    vscode.commands.registerCommand("knock.testTriple", () =>
+      triggerPattern("triple", true),
+    ),
   );
 
   const config = vscode.workspace.getConfiguration("knock");
@@ -107,7 +124,7 @@ function startListening() {
     rl.on("line", (line) => {
       outputChannel.appendLine(`[sidecar] ${line}`);
       try {
-        const event = JSON.parse(line);
+        const event = JSON.parse(line) as KnockEvent;
         handleEvent(event);
       } catch {
         outputChannel.appendLine(`[parse error] ${line}`);
@@ -122,11 +139,12 @@ function startListening() {
   );
 }
 
-function handleEvent(event: { type: string; [key: string]: unknown }) {
+function handleEvent(event: KnockEvent) {
   switch (event.type) {
-    case "double_knock":
-      vscode.window.showInformationMessage("Knock knock detected!");
-      outputChannel.appendLine(">>> Double knock detected!");
+    case "knock_pattern":
+      if (event.pattern) {
+        void triggerPattern(event.pattern, false, event);
+      }
       break;
     case "started":
       outputChannel.appendLine(
@@ -140,6 +158,49 @@ function handleEvent(event: { type: string; [key: string]: unknown }) {
       outputChannel.appendLine("Sidecar stopped gracefully.");
       break;
   }
+}
+
+async function triggerPattern(
+  pattern: KnockPattern,
+  manualTest = false,
+  _event?: KnockEvent,
+) {
+  const config = vscode.workspace.getConfiguration("knock");
+  const shouldNotify = config.get<boolean>(`${pattern}Knock.showNotification`, true);
+  const command = config.get<string>(`${pattern}Knock.command`, "").trim();
+  const commandArgs = config.get<unknown[]>(`${pattern}Knock.args`, []);
+
+  outputChannel.appendLine(
+    `>>> ${capitalize(pattern)} knock detected${manualTest ? " (test)" : ""}`,
+  );
+
+  if (shouldNotify) {
+    const suffix = manualTest ? " (test)" : "";
+    void vscode.window.showInformationMessage(
+      `${capitalize(pattern)} knock detected!${suffix}`,
+    );
+  }
+
+  if (!command) {
+    return;
+  }
+
+  try {
+    await vscode.commands.executeCommand(command, ...(commandArgs ?? []));
+    outputChannel.appendLine(`Executed command for ${pattern} knock: ${command}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    outputChannel.appendLine(
+      `Command execution failed for ${pattern} knock (${command}): ${message}`,
+    );
+    void vscode.window.showErrorMessage(
+      `Knock action failed for ${pattern} knock: ${message}`,
+    );
+  }
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function stopListening() {

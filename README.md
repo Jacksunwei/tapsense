@@ -9,14 +9,22 @@ Prototype monorepo for a MacBook knock-triggered VS Code notification.
 
 ## Demo goal
 
-When the sidecar emits a `double_knock` event, the extension pops a VS Code notification:
+When the sidecar emits a knock-pattern event, the extension can:
 
-> Knock knock detected!
+- show a VS Code notification
+- trigger a configurable VS Code command
+- trigger a command contributed by another extension
+
+Supported patterns today:
+
+- single knock
+- double knock
+- triple knock
 
 ## Current prototype status
 
-- VS Code extension is wired and can spawn the sidecar, parse JSON lines, and show notifications.
-- Sidecar supports `--simulate` mode today for a reliable local demo.
+- VS Code extension is wired and can spawn the sidecar, parse JSON lines, show notifications, and execute configured VS Code commands.
+- Sidecar supports `--simulate` mode today for a reliable local demo and cycles through single, double, and triple knock patterns.
 - Sidecar also includes a best-effort Apple Silicon private HID path using `IOKit` matching for usage page `0xFF00` and usage `0x03`.
 - Real sensor mode is still experimental. On some machines the private device may not be exposed or may require additional privileges / different matching logic.
 
@@ -74,7 +82,7 @@ Then:
 3. In the Extension Development Host, run `Knock: Start Listening`.
 4. Keep `knock.simulateMode` enabled.
 5. Wait a few seconds for the simulated double-knock.
-6. You should see `Knock knock detected!`.
+6. You should see notifications for the simulated knock patterns.
 
 ## One-command build
 
@@ -105,7 +113,7 @@ cd ~/GitHub/vscode-knock-demo/knock-sidecar
 .build/release/KnockSidecar --simulate
 ```
 
-You should see JSON events, including periodic `double_knock` events.
+You should see JSON events for `single`, `double`, and `triple` knock patterns.
 
 Experimental real mode:
 
@@ -130,7 +138,7 @@ npm run compile
 2. Press `F5` to launch the Extension Development Host.
 3. In the Extension Development Host, run `Knock: Start Listening` from the command palette.
 4. Keep `knock.simulateMode` enabled for the first demo.
-5. Wait a few seconds. The sidecar will emit a simulated `double_knock` event and VS Code should show `Knock knock detected!`.
+5. Wait a few seconds. The sidecar will cycle through simulated single, double, and triple knocks, and VS Code should react using notifications or configured commands.
 
 ## Installing the extension for local use
 
@@ -172,13 +180,41 @@ Or set `knock.sidecarPath` to a custom binary path in VS Code settings.
 
 - `Knock: Start Listening`
 - `Knock: Stop Listening`
-- `Knock: Test Notification`
+- `Knock: Test Single Knock`
+- `Knock: Test Double Knock`
+- `Knock: Test Triple Knock`
 
 ## Extension settings
+
+Core settings:
 
 - `knock.sidecarPath`: optional explicit path to the sidecar binary
 - `knock.simulateMode`: run sidecar in simulation mode, default `true`
 - `knock.autoStart`: auto-start listener after activation, default `false`
+
+Pattern action settings:
+
+- `knock.singleKnock.command`
+- `knock.singleKnock.args`
+- `knock.singleKnock.showNotification`
+- `knock.doubleKnock.command`
+- `knock.doubleKnock.args`
+- `knock.doubleKnock.showNotification`
+- `knock.tripleKnock.command`
+- `knock.tripleKnock.args`
+- `knock.tripleKnock.showNotification`
+
+### Example: trigger another extension command
+
+```json
+{
+  "knock.doubleKnock.command": "workbench.action.quickOpen",
+  "knock.doubleKnock.args": [],
+  "knock.doubleKnock.showNotification": true
+}
+```
+
+Any command id that VS Code can execute is fair game, including commands contributed by other installed extensions.
 
 ## Notes on the real sensor path
 

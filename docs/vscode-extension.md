@@ -10,11 +10,13 @@ The extension is the editor-facing half of the prototype. It does not detect kno
 
 ## Activation model
 
-The extension contributes three commands:
+The extension contributes five commands:
 
 - `Knock: Start Listening`
 - `Knock: Stop Listening`
-- `Knock: Test Notification`
+- `Knock: Test Single Knock`
+- `Knock: Test Double Knock`
+- `Knock: Test Triple Knock`
 
 It can also auto-start after activation when `knock.autoStart` is enabled.
 
@@ -49,7 +51,7 @@ Each stdout line is parsed as JSON and dispatched by `type`.
 Handled event types:
 
 - `started`
-- `double_knock`
+- `knock_pattern`
 - `error`
 - `stopped`
 
@@ -68,13 +70,21 @@ A status bar item shows whether listening is active.
 
 ### Notifications
 
-When the extension receives a `double_knock` event, it calls:
+When the extension receives a `knock_pattern` event, it resolves the matching settings bucket for `single`, `double`, or `triple` knock.
 
-```ts
-vscode.window.showInformationMessage("Knock knock detected!")
-```
+For each pattern it can:
 
-The manual test command uses the same notification path, which makes it useful for debugging extension UX without involving the sidecar.
+1. show a notification
+2. execute a configured command id
+3. pass a configured argument array to that command
+
+Because it uses `vscode.commands.executeCommand(...)`, the target command can come from:
+
+- VS Code itself
+- this extension
+- another installed extension
+
+The manual test commands use the same action path, which makes them useful for debugging extension behavior without involving the sidecar.
 
 ## Why this extension stays thin
 
@@ -98,6 +108,6 @@ If the sidecar cannot be started or crashes:
 
 1. show richer notifications with event metadata
 2. expose sensitivity settings in the extension UI
-3. support command binding, not just notifications
+3. add validation or discovery helpers for configured command ids
 4. support background restart when the sidecar exits unexpectedly
 5. package the sidecar automatically during extension install

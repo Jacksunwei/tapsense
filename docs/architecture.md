@@ -30,7 +30,7 @@ knock-sidecar sensor source
         ↓
 KnockDetector classifies double-knock
         ↓
-stdout JSON event: {"type":"double_knock"}
+stdout JSON event: {"type":"knock_pattern","pattern":"double","count":2}
         ↓
 VS Code extension reads line
         ↓
@@ -45,7 +45,9 @@ Example messages:
 
 ```json
 {"type":"started","mode":"simulate"}
-{"type":"double_knock","timestamp":254322.25}
+{"type":"knock_pattern","pattern":"single","count":1,"timestamp":0.01}
+{"type":"knock_pattern","pattern":"double","count":2,"timestamp":1.95}
+{"type":"knock_pattern","pattern":"triple","count":3,"timestamp":3.90}
 {"type":"error","message":"Failed to start accelerometer. Use --simulate mode."}
 {"type":"stopped"}
 ```

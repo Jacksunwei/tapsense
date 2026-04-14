@@ -1,7 +1,7 @@
 {
   "name": "vscode-knock",
   "displayName": "Knock Knock Detector",
-  "description": "Detects double-knock gestures on your MacBook via accelerometer sidecar",
+  "description": "Detects single, double, and triple knock gestures on your MacBook via accelerometer sidecar",
   "version": "0.0.1",
   "publisher": "demo",
   "engines": {
@@ -11,7 +11,9 @@
   "activationEvents": [
     "onCommand:knock.start",
     "onCommand:knock.stop",
-    "onCommand:knock.test",
+    "onCommand:knock.testSingle",
+    "onCommand:knock.testDouble",
+    "onCommand:knock.testTriple",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -26,8 +28,16 @@
         "title": "Knock: Stop Listening"
       },
       {
-        "command": "knock.test",
-        "title": "Knock: Test Notification"
+        "command": "knock.testSingle",
+        "title": "Knock: Test Single Knock"
+      },
+      {
+        "command": "knock.testDouble",
+        "title": "Knock: Test Double Knock"
+      },
+      {
+        "command": "knock.testTriple",
+        "title": "Knock: Test Triple Knock"
       }
     ],
     "configuration": {
@@ -47,6 +57,51 @@
           "type": "boolean",
           "default": false,
           "description": "Automatically start listening on extension activation."
+        },
+        "knock.singleKnock.command": {
+          "type": "string",
+          "default": "",
+          "description": "VS Code command id to run on a single knock. Can target another extension's command."
+        },
+        "knock.singleKnock.args": {
+          "type": "array",
+          "default": [],
+          "description": "Arguments passed to the single-knock command."
+        },
+        "knock.singleKnock.showNotification": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a VS Code notification when a single knock is detected."
+        },
+        "knock.doubleKnock.command": {
+          "type": "string",
+          "default": "",
+          "description": "VS Code command id to run on a double knock. Can target another extension's command."
+        },
+        "knock.doubleKnock.args": {
+          "type": "array",
+          "default": [],
+          "description": "Arguments passed to the double-knock command."
+        },
+        "knock.doubleKnock.showNotification": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a VS Code notification when a double knock is detected."
+        },
+        "knock.tripleKnock.command": {
+          "type": "string",
+          "default": "",
+          "description": "VS Code command id to run on a triple knock. Can target another extension's command."
+        },
+        "knock.tripleKnock.args": {
+          "type": "array",
+          "default": [],
+          "description": "Arguments passed to the triple-knock command."
+        },
+        "knock.tripleKnock.showNotification": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a VS Code notification when a triple knock is detected."
         }
       }
     }
