@@ -2,4 +2,5 @@ vscode-extension/node_modules/
 vscode-extension/out/
 knock-sidecar/.build/
 mac-menu-app/.build/
+dist/
 .DS_Store

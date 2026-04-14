@@ -147,6 +147,11 @@ final class SidecarController: NSObject {
 
     private func resolveSidecarPath() -> URL {
         let fm = FileManager.default
+
+        if let bundled = bundledSidecarPath(), fm.fileExists(atPath: bundled.path) {
+            return bundled
+        }
+
         let candidates = [
             URL(fileURLWithPath: fm.currentDirectoryPath),
             URL(fileURLWithPath: (fm.homeDirectoryForCurrentUser.appending(path: "GitHub/vscode-knock-demo")).path),
@@ -173,6 +178,20 @@ final class SidecarController: NSObject {
             .appending(path: ".build")
             .appending(path: "release")
             .appending(path: "KnockSidecar")
+    }
+
+    private func bundledSidecarPath() -> URL? {
+        let executableURL = URL(fileURLWithPath: CommandLine.arguments[0]).standardizedFileURL
+        let contentsURL = executableURL
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        guard contentsURL.lastPathComponent == "Contents" else {
+            return nil
+        }
+
+        let resourcesURL = contentsURL.appending(path: "Resources")
+        return resourcesURL.appending(path: "KnockSidecar")
     }
 
     private func searchRoots(startingAt base: URL) -> [URL] {

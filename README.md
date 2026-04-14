@@ -47,6 +47,7 @@ vscode-knock-demo/
 - `docs/knock-sidecar.md` - how the sidecar is structured and how knock detection works
 - `docs/compatibility.md` - provisional hardware compatibility matrix for the private sensor path
 - `docs/mac-menu-app.md` - architecture and MVP implementation notes for the native macOS menu bar controller app
+- `docs/distribution.md` - bundled app layout and future GitHub/Homebrew distribution notes
 
 ## Installation
 
@@ -66,7 +67,7 @@ cd ~/GitHub/vscode-knock-demo
 ./build.sh
 ```
 
-This installs extension dependencies, builds the Swift sidecar, compiles the extension, and builds the menu bar app executable.
+This installs extension dependencies, builds the Swift sidecar, compiles the extension, builds the menu bar executable, and assembles a bundled `KnockMenu.app`.
 
 ## Getting started
 
@@ -144,11 +145,17 @@ cd ~/GitHub/vscode-knock-demo/mac-menu-app
 swift build -c release
 ```
 
-Run:
+Run the raw executable:
 
 ```bash
 cd ~/GitHub/vscode-knock-demo/mac-menu-app
 ./.build/release/KnockMenuApp
+```
+
+Or launch the bundled app:
+
+```bash
+open ~/GitHub/vscode-knock-demo/dist/KnockMenu.app
 ```
 
 Current MVP menu actions:
@@ -160,7 +167,7 @@ Current MVP menu actions:
 - view status and last event
 - send a test notification-style alert
 
-Note: this first version is a native menu bar executable, not a packaged `.app` bundle yet.
+Note: the repo now produces a real `.app` bundle layout in `dist/KnockMenu.app`, but it is not code-signed or notarized yet.
 
 ## 4) Run the extension in VS Code
 

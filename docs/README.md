@@ -10,6 +10,7 @@ This folder explains how the prototype is designed, how the two subprojects talk
 - `compatibility.md` - provisional hardware compatibility matrix for this private sensor path
 - `vscode-compatible-ides.md` - how to configure command mapping in VS Code-compatible IDEs
 - `mac-menu-app.md` - proposed architecture for a native macOS menu bar controller app
+- `distribution.md` - how the bundled app is assembled and prepared for future GitHub/Homebrew release flow
 
 ## Quick summary
 
