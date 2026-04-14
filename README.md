@@ -35,6 +35,7 @@ vscode-knock-demo/
 - `docs/architecture.md` - overall system design and event flow
 - `docs/vscode-extension.md` - how the extension starts the sidecar and handles events
 - `docs/knock-sidecar.md` - how the sidecar is structured and how knock detection works
+- `docs/compatibility.md` - provisional hardware compatibility matrix for the private sensor path
 
 ## Installation
 

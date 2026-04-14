@@ -7,6 +7,7 @@ This folder explains how the prototype is designed, how the two subprojects talk
 - `architecture.md` - system-level overview of the prototype
 - `vscode-extension.md` - extension design, activation flow, and event handling
 - `knock-sidecar.md` - sidecar design, sensor abstraction, and knock detection
+- `compatibility.md` - provisional hardware compatibility matrix for this private sensor path
 
 ## Quick summary
 
