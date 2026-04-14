@@ -204,13 +204,27 @@ Pattern action settings:
 - `knock.tripleKnock.args`
 - `knock.tripleKnock.showNotification`
 
-### Example: trigger another extension command
+### Example: map a knock to the action behind `Cmd+L`
+
+In VS Code on macOS, `Cmd+L` maps to the command id `expandLineSelection`.
 
 ```json
 {
-  "knock.doubleKnock.command": "workbench.action.quickOpen",
+  "knock.doubleKnock.command": "expandLineSelection",
   "knock.doubleKnock.args": [],
   "knock.doubleKnock.showNotification": true
+}
+```
+
+### Example: trigger another extension command
+
+If another extension contributes a command id, you can point a knock pattern at it the same way:
+
+```json
+{
+  "knock.tripleKnock.command": "someExtension.someCommand",
+  "knock.tripleKnock.args": ["example"],
+  "knock.tripleKnock.showNotification": true
 }
 ```
 

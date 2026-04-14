@@ -84,6 +84,34 @@ Because it uses `vscode.commands.executeCommand(...)`, the target command can co
 - this extension
 - another installed extension
 
+### Concrete example: reuse the action behind `Cmd+L`
+
+In the default macOS VS Code keymap, `Cmd+L` maps to:
+
+- command id: `expandLineSelection`
+
+So a working settings example is:
+
+```json
+{
+  "knock.doubleKnock.command": "expandLineSelection",
+  "knock.doubleKnock.args": [],
+  "knock.doubleKnock.showNotification": true
+}
+```
+
+### Concrete example: trigger another extension
+
+If another extension exposes a command id such as `someExtension.someCommand`, you can wire it the same way:
+
+```json
+{
+  "knock.tripleKnock.command": "someExtension.someCommand",
+  "knock.tripleKnock.args": ["example"],
+  "knock.tripleKnock.showNotification": true
+}
+```
+
 The manual test commands use the same action path, which makes them useful for debugging extension behavior without involving the sidecar.
 
 ## Why this extension stays thin
