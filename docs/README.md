@@ -9,6 +9,7 @@ This folder explains how the prototype is designed, how the two subprojects talk
 - `knock-sidecar.md` - sidecar design, sensor abstraction, and knock detection
 - `compatibility.md` - provisional hardware compatibility matrix for this private sensor path
 - `vscode-compatible-ides.md` - how to configure command mapping in VS Code-compatible IDEs
+- `mac-menu-app.md` - proposed architecture for a native macOS menu bar controller app
 
 ## Quick summary
 

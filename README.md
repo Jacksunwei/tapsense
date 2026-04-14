@@ -44,6 +44,7 @@ vscode-knock-demo/
 - `docs/vscode-extension.md` - how the extension starts the sidecar and handles events
 - `docs/knock-sidecar.md` - how the sidecar is structured and how knock detection works
 - `docs/compatibility.md` - provisional hardware compatibility matrix for the private sensor path
+- `docs/mac-menu-app.md` - proposed architecture for a native macOS menu bar controller app
 
 ## Installation
 
