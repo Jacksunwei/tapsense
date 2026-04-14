@@ -144,6 +144,38 @@ npm run compile
 
 This repo currently ships as a development prototype, not a packaged Marketplace extension.
 
+## Using it in VS Code-compatible IDEs
+
+This design should also work in editors and IDEs that are compatible with the VS Code extension model.
+
+General rule:
+
+- install the extension the same way you would install a local VSIX or development extension in that IDE
+- point knock patterns at command ids, not keybindings
+- if the IDE remaps `Cmd+L` or uses an extension-defined action, configure the actual command id behind that action
+
+Typical flow in a VS Code-compatible IDE:
+
+1. install or load the extension
+2. build the sidecar and make sure the binary path is valid
+3. open the IDE's keyboard shortcut editor
+4. find the command currently bound to the shortcut you care about
+5. copy that command id into the knock settings
+
+### Example: Google Anti-Gravity style setup
+
+If Google Anti-Gravity is VS Code-compatible in your environment and exposes command ids through the normal keybinding system, configure it exactly the same way:
+
+```json
+{
+  "knock.doubleKnock.command": "the.actual.command.id.behind.cmdL",
+  "knock.doubleKnock.args": [],
+  "knock.doubleKnock.showNotification": true
+}
+```
+
+The important point is that the knock extension should invoke the command id directly, even if the visible shortcut in that IDE is `Cmd+L`.
+
 ### Option A: run it in Extension Development Host
 
 This is the easiest path and is recommended for now:

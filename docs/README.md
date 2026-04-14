@@ -8,6 +8,7 @@ This folder explains how the prototype is designed, how the two subprojects talk
 - `vscode-extension.md` - extension design, activation flow, and event handling
 - `knock-sidecar.md` - sidecar design, sensor abstraction, and knock detection
 - `compatibility.md` - provisional hardware compatibility matrix for this private sensor path
+- `vscode-compatible-ides.md` - how to configure command mapping in VS Code-compatible IDEs
 
 ## Quick summary
 
