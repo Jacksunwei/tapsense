@@ -4,9 +4,9 @@
     {
       "type": "npm",
       "script": "compile",
-      "path": "vscode-extension",
+      "path": "tapsense-vscode",
       "group": "build",
-      "label": "npm: compile - vscode-extension"
+      "label": "npm: compile - tapsense-vscode"
     }
   ]
 }

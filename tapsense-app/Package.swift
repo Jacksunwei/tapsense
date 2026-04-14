@@ -2,15 +2,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "KnockMenuApp",
+    name: "TapSenseApp",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "KnockMenuApp", targets: ["KnockMenuApp"]),
+        .executable(name: "TapSenseApp", targets: ["TapSenseApp"]),
     ],
     targets: [
         .executableTarget(
-            name: "KnockMenuApp",
-            path: "Sources/KnockMenuApp",
+            name: "TapSenseApp",
+            path: "Sources/TapSenseApp",
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("SwiftUI"),

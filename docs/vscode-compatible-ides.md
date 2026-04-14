@@ -35,17 +35,17 @@ If those pieces exist, this prototype should map cleanly.
 
 ```json
 {
-  "knock.singleKnock.command": "",
-  "knock.singleKnock.args": [],
-  "knock.singleKnock.showNotification": true,
+  "tapsense.singleKnock.command": "",
+  "tapsense.singleKnock.args": [],
+  "tapsense.singleKnock.showNotification": true,
 
-  "knock.doubleKnock.command": "the.actual.command.id",
-  "knock.doubleKnock.args": [],
-  "knock.doubleKnock.showNotification": true,
+  "tapsense.doubleKnock.command": "the.actual.command.id",
+  "tapsense.doubleKnock.args": [],
+  "tapsense.doubleKnock.showNotification": true,
 
-  "knock.tripleKnock.command": "",
-  "knock.tripleKnock.args": [],
-  "knock.tripleKnock.showNotification": true
+  "tapsense.tripleKnock.command": "",
+  "tapsense.tripleKnock.args": [],
+  "tapsense.tripleKnock.showNotification": true
 }
 ```
 
@@ -57,7 +57,7 @@ Then you should not configure:
 
 ```json
 {
-  "knock.doubleKnock.command": "expandLineSelection"
+  "tapsense.doubleKnock.command": "expandLineSelection"
 }
 ```
 
@@ -75,9 +75,9 @@ Example:
 
 ```json
 {
-  "knock.doubleKnock.command": "the.actual.command.id.behind.cmdL",
-  "knock.doubleKnock.args": [],
-  "knock.doubleKnock.showNotification": true
+  "tapsense.doubleKnock.command": "the.actual.command.id.behind.cmdL",
+  "tapsense.doubleKnock.args": [],
+  "tapsense.doubleKnock.showNotification": true
 }
 ```
 
@@ -94,7 +94,7 @@ Likely causes:
 
 ### How to isolate the problem
 
-1. run `Knock: Test Double Knock`
+1. run `TapSense: Test Double Knock`
 2. if notification appears, extension is alive
 3. set the target command to a known built-in command such as `workbench.action.quickOpen`
 4. if that works, the remaining problem is your custom target command id

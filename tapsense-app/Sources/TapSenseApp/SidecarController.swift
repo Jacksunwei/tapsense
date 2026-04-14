@@ -11,8 +11,8 @@ final class SidecarController: NSObject {
     private let jsonDecoder = JSONDecoder()
 
     var simulateMode = true
-    var mode: MenuKnockMode = .palmRest
-    var sensitivity: MenuKnockSensitivity = .medium
+    var mode: TapSenseMode = .palmRest
+    var sensitivity: TapSenseSensitivity = .medium
     var onStateChange: (() -> Void)?
 
     override init() {
@@ -29,7 +29,7 @@ final class SidecarController: NSObject {
         let binary = resolveSidecarPath()
         guard FileManager.default.fileExists(atPath: binary.path) else {
             statusText = "Missing sidecar"
-            lastEventText = "Build knock-sidecar first: ./build.sh"
+            lastEventText = "Build tapsense-sidecar first: ./build.sh"
             onStateChange?()
             return
         }
@@ -181,7 +181,7 @@ final class SidecarController: NSObject {
         case "error":
             statusText = "Error"
             lastEventText = event.message ?? "Unknown error"
-            showAlert(title: "Knock error", message: lastEventText)
+            showAlert(title: "TapSense error", message: lastEventText)
         case "stopped":
             statusText = "Stopped"
             lastEventText = "Sidecar stopped"
@@ -192,7 +192,7 @@ final class SidecarController: NSObject {
     }
 
     func sendTestNotification() {
-        showAlert(title: "Knock menu app", message: "Test notification")
+        showAlert(title: "TapSense app", message: "Test notification")
     }
 
     private func showAlert(title: String, message: String) {
@@ -212,17 +212,17 @@ final class SidecarController: NSObject {
 
         let candidates = [
             URL(fileURLWithPath: fm.currentDirectoryPath),
-            URL(fileURLWithPath: (fm.homeDirectoryForCurrentUser.appending(path: "GitHub/vscode-knock-demo")).path),
+            URL(fileURLWithPath: (fm.homeDirectoryForCurrentUser.appending(path: "GitHub/tapsense")).path),
             URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
         ]
 
         for base in candidates {
             for root in searchRoots(startingAt: base) {
                 let candidate = root
-                    .appending(path: "knock-sidecar")
+                    .appending(path: "tapsense-sidecar")
                     .appending(path: ".build")
                     .appending(path: "release")
-                    .appending(path: "KnockSidecar")
+                    .appending(path: "TapSenseSidecar")
                 if fm.fileExists(atPath: candidate.path) {
                     return candidate
                 }
@@ -231,11 +231,11 @@ final class SidecarController: NSObject {
 
         return fm.homeDirectoryForCurrentUser
             .appending(path: "GitHub")
-            .appending(path: "vscode-knock-demo")
-            .appending(path: "knock-sidecar")
+            .appending(path: "tapsense")
+            .appending(path: "tapsense-sidecar")
             .appending(path: ".build")
             .appending(path: "release")
-            .appending(path: "KnockSidecar")
+            .appending(path: "TapSenseSidecar")
     }
 
     private func bundledSidecarPath() -> URL? {
@@ -249,7 +249,7 @@ final class SidecarController: NSObject {
         }
 
         let resourcesURL = contentsURL.appending(path: "Resources")
-        return resourcesURL.appending(path: "KnockSidecar")
+        return resourcesURL.appending(path: "TapSenseSidecar")
     }
 
     private func searchRoots(startingAt base: URL) -> [URL] {

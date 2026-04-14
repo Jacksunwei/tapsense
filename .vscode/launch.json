@@ -5,9 +5,9 @@
       "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}/vscode-extension"],
-      "outFiles": ["${workspaceFolder}/vscode-extension/out/**/*.js"],
-      "preLaunchTask": "npm: compile - vscode-extension"
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/tapsense-vscode"],
+      "outFiles": ["${workspaceFolder}/tapsense-vscode/out/**/*.js"],
+      "preLaunchTask": "npm: compile - tapsense-vscode"
     }
   ]
 }

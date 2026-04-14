@@ -1,6 +1,6 @@
 {
-  "name": "vscode-knock",
-  "displayName": "Knock Knock Detector",
+  "name": "vscode-tapsense",
+  "displayName": "TapSense",
   "description": "Detects single, double, and triple knock gestures on your MacBook via accelerometer sidecar",
   "version": "0.0.1",
   "publisher": "demo",
@@ -9,108 +9,108 @@
   },
   "categories": ["Other"],
   "activationEvents": [
-    "onCommand:knock.start",
-    "onCommand:knock.stop",
-    "onCommand:knock.testSingle",
-    "onCommand:knock.testDouble",
-    "onCommand:knock.testTriple",
+    "onCommand:tapsense.start",
+    "onCommand:tapsense.stop",
+    "onCommand:tapsense.testSingle",
+    "onCommand:tapsense.testDouble",
+    "onCommand:tapsense.testTriple",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "knock.start",
-        "title": "Knock: Start Listening"
+        "command": "tapsense.start",
+        "title": "TapSense: Start Listening"
       },
       {
-        "command": "knock.stop",
-        "title": "Knock: Stop Listening"
+        "command": "tapsense.stop",
+        "title": "TapSense: Stop Listening"
       },
       {
-        "command": "knock.testSingle",
-        "title": "Knock: Test Single Knock"
+        "command": "tapsense.testSingle",
+        "title": "TapSense: Test Single Knock"
       },
       {
-        "command": "knock.testDouble",
-        "title": "Knock: Test Double Knock"
+        "command": "tapsense.testDouble",
+        "title": "TapSense: Test Double Knock"
       },
       {
-        "command": "knock.testTriple",
-        "title": "Knock: Test Triple Knock"
+        "command": "tapsense.testTriple",
+        "title": "TapSense: Test Triple Knock"
       }
     ],
     "configuration": {
-      "title": "Knock Detector",
+      "title": "TapSense",
       "properties": {
-        "knock.sidecarPath": {
+        "tapsense.sidecarPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the knock-sidecar binary. If empty, uses the built binary in the repo."
+          "description": "Path to the tapsense-sidecar binary. If empty, uses the built binary in the repo."
         },
-        "knock.simulateMode": {
+        "tapsense.simulateMode": {
           "type": "boolean",
           "default": true,
           "description": "Run sidecar in --simulate mode (no real accelerometer needed)."
         },
-        "knock.mode": {
+        "tapsense.mode": {
           "type": "string",
           "enum": ["palmRest", "desk"],
           "default": "palmRest",
           "description": "Detection profile to pass to the sidecar."
         },
-        "knock.sensitivity": {
+        "tapsense.sensitivity": {
           "type": "string",
           "enum": ["low", "medium", "high"],
           "default": "medium",
           "description": "Detection sensitivity to pass to the sidecar."
         },
-        "knock.autoStart": {
+        "tapsense.autoStart": {
           "type": "boolean",
           "default": false,
           "description": "Automatically start listening on extension activation."
         },
-        "knock.singleKnock.command": {
+        "tapsense.singleKnock.command": {
           "type": "string",
           "default": "",
           "description": "VS Code command id to run on a single knock. Can target another extension's command."
         },
-        "knock.singleKnock.args": {
+        "tapsense.singleKnock.args": {
           "type": "array",
           "default": [],
           "description": "Arguments passed to the single-knock command."
         },
-        "knock.singleKnock.showNotification": {
+        "tapsense.singleKnock.showNotification": {
           "type": "boolean",
           "default": true,
           "description": "Show a VS Code notification when a single knock is detected."
         },
-        "knock.doubleKnock.command": {
+        "tapsense.doubleKnock.command": {
           "type": "string",
           "default": "",
           "description": "VS Code command id to run on a double knock. Can target another extension's command."
         },
-        "knock.doubleKnock.args": {
+        "tapsense.doubleKnock.args": {
           "type": "array",
           "default": [],
           "description": "Arguments passed to the double-knock command."
         },
-        "knock.doubleKnock.showNotification": {
+        "tapsense.doubleKnock.showNotification": {
           "type": "boolean",
           "default": true,
           "description": "Show a VS Code notification when a double knock is detected."
         },
-        "knock.tripleKnock.command": {
+        "tapsense.tripleKnock.command": {
           "type": "string",
           "default": "",
           "description": "VS Code command id to run on a triple knock. Can target another extension's command."
         },
-        "knock.tripleKnock.args": {
+        "tapsense.tripleKnock.args": {
           "type": "array",
           "default": [],
           "description": "Arguments passed to the triple-knock command."
         },
-        "knock.tripleKnock.showNotification": {
+        "tapsense.tripleKnock.showNotification": {
           "type": "boolean",
           "default": true,
           "description": "Show a VS Code notification when a triple knock is detected."
@@ -122,7 +122,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "tsc --noEmit -p ./",
-    "build:sidecar": "cd ../knock-sidecar && swift build -c release"
+    "build:sidecar": "cd ../tapsense-sidecar && swift build -c release"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,6 +1,6 @@
-vscode-extension/node_modules/
-vscode-extension/out/
-knock-sidecar/.build/
-mac-menu-app/.build/
+tapsense-vscode/node_modules/
+tapsense-vscode/out/
+tapsense-sidecar/.build/
+tapsense-app/.build/
 dist/
 .DS_Store

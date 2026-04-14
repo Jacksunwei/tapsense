@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "KnockSidecar",
+    name: "TapSenseSidecar",
     platforms: [.macOS(.v13)],
     targets: [
         .executableTarget(
-            name: "KnockSidecar",
-            path: "Sources/KnockSidecar",
+            name: "TapSenseSidecar",
+            path: "Sources/TapSenseSidecar",
             linkerSettings: [
                 .linkedFramework("IOKit"),
                 .linkedFramework("CoreFoundation"),

@@ -6,19 +6,19 @@ The extension is the editor-facing half of the prototype. It does not detect kno
 
 ## Main file
 
-- `vscode-extension/src/extension.ts`
+- `tapsense-vscode/src/extension.ts`
 
 ## Activation model
 
 The extension contributes five commands:
 
-- `Knock: Start Listening`
-- `Knock: Stop Listening`
-- `Knock: Test Single Knock`
-- `Knock: Test Double Knock`
-- `Knock: Test Triple Knock`
+- `TapSense: Start Listening`
+- `TapSense: Stop Listening`
+- `TapSense: Test Single Knock`
+- `TapSense: Test Double Knock`
+- `TapSense: Test Triple Knock`
 
-It can also auto-start after activation when `knock.autoStart` is enabled.
+It can also auto-start after activation when `tapsense.autoStart` is enabled.
 
 ## Startup flow
 
@@ -35,8 +35,8 @@ When listening starts, the extension:
 
 Resolution order:
 
-1. `knock.sidecarPath` if set
-2. default repo-local path: `../knock-sidecar/.build/release/KnockSidecar`
+1. `tapsense.sidecarPath` if set
+2. default repo-local path: `../tapsense-sidecar/.build/release/TapSenseSidecar`
 
 This makes the monorepo easy to run locally without extra configuration.
 
@@ -44,8 +44,8 @@ This makes the monorepo easy to run locally without extra configuration.
 
 The extension exposes the same profile knobs as the menu app:
 
-- `knock.mode`: `palmRest` or `desk`
-- `knock.sensitivity`: `low`, `medium`, or `high`
+- `tapsense.mode`: `palmRest` or `desk`
+- `tapsense.sensitivity`: `low`, `medium`, or `high`
 
 Those settings are passed directly to the sidecar as CLI flags.
 
@@ -74,12 +74,12 @@ stderr is not parsed as protocol. It is forwarded to the output channel for debu
 
 A status bar item shows whether listening is active.
 
-- `Knock: Off`
-- `Knock: Listening`
+- `TapSense: Off`
+- `TapSense: Listening`
 
 ### Notifications
 
-When the extension receives a `knock_pattern` event, it resolves the matching settings bucket for `single`, `double`, or `triple` knock.
+When the extension receives a `knock_pattern` event, it resolves the matching settings bucket for `single`, `double`, or `triple` tapsense.
 
 For each pattern it can:
 
@@ -103,9 +103,9 @@ So a working settings example is:
 
 ```json
 {
-  "knock.doubleKnock.command": "expandLineSelection",
-  "knock.doubleKnock.args": [],
-  "knock.doubleKnock.showNotification": true
+  "tapsense.doubleKnock.command": "expandLineSelection",
+  "tapsense.doubleKnock.args": [],
+  "tapsense.doubleKnock.showNotification": true
 }
 ```
 
@@ -115,9 +115,9 @@ If another extension exposes a command id such as `someExtension.someCommand`, y
 
 ```json
 {
-  "knock.tripleKnock.command": "someExtension.someCommand",
-  "knock.tripleKnock.args": ["example"],
-  "knock.tripleKnock.showNotification": true
+  "tapsense.tripleKnock.command": "someExtension.someCommand",
+  "tapsense.tripleKnock.args": ["example"],
+  "tapsense.tripleKnock.showNotification": true
 }
 ```
 
@@ -139,7 +139,7 @@ If the sidecar cannot be started or crashes:
 
 - the output channel captures details
 - the extension shows an error message when appropriate
-- internal state resets back to `Knock: Off`
+- internal state resets back to `TapSense: Off`
 
 ## Future extension improvements
 

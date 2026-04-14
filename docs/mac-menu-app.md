@@ -10,10 +10,10 @@ This document now covers both:
 The repo now includes:
 
 ```text
-mac-menu-app/
+tapsense-app/
 ├── Package.swift
 └── Sources/
-    └── KnockMenuApp/
+    └── TapSenseApp/
         ├── main.swift
         ├── MenuApp.swift
         ├── Models.swift
@@ -53,7 +53,7 @@ A dedicated macOS menu bar app makes the knock system feel like a native Mac uti
 ```text
 macOS menu bar app
         ↓ launches / controls
-     knock-sidecar
+     tapsense-sidecar
         ↓ knock events
    VS Code extension
 ```
@@ -67,7 +67,7 @@ In the current MVP:
 
 ## Responsibilities
 
-### 1. `knock-sidecar`
+### 1. `tapsense-sidecar`
 
 Responsibilities:
 
@@ -76,7 +76,7 @@ Responsibilities:
 - classify knock patterns
 - emit structured events
 
-### 2. `vscode-extension`
+### 2. `tapsense-vscode`
 
 Responsibilities:
 
@@ -85,7 +85,7 @@ Responsibilities:
 - trigger VS Code or extension-provided actions
 - show editor notifications
 
-### 3. `mac-menu-app`
+### 3. `tapsense-app`
 
 Responsibilities:
 
@@ -98,10 +98,10 @@ Responsibilities:
 ## Suggested repo layout
 
 ```text
-vscode-knock-demo/
-├── knock-sidecar/
-├── vscode-extension/
-└── mac-menu-app/
+tapsense/
+├── tapsense-sidecar/
+├── tapsense-vscode/
+└── tapsense-app/
 ```
 
 ## Implementation notes

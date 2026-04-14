@@ -5,15 +5,15 @@
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleDisplayName</key>
-  <string>KnockMenu</string>
+  <string>TapSense</string>
   <key>CFBundleExecutable</key>
-  <string>KnockMenuApp</string>
+  <string>TapSenseApp</string>
   <key>CFBundleIdentifier</key>
-  <string>com.jacksunwei.knockmenu</string>
+  <string>com.jacksunwei.tapsense</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>KnockMenu</string>
+  <string>TapSense</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

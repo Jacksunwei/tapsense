@@ -1,4 +1,4 @@
-# knock-sidecar design
+# tapsense-sidecar design
 
 ## Purpose
 
@@ -8,10 +8,10 @@ It exists because low-level macOS hardware access is a poor fit for a normal VS 
 
 ## Main files
 
-- `knock-sidecar/Sources/KnockSidecar/main.swift`
-- `knock-sidecar/Sources/KnockSidecar/Accelerometer.swift`
-- `knock-sidecar/Sources/KnockSidecar/KnockDetector.swift`
-- `knock-sidecar/Sources/KnockSidecar/Simulator.swift`
+- `tapsense-sidecar/Sources/TapSenseSidecar/main.swift`
+- `tapsense-sidecar/Sources/TapSenseSidecar/Accelerometer.swift`
+- `tapsense-sidecar/Sources/TapSenseSidecar/KnockDetector.swift`
+- `tapsense-sidecar/Sources/TapSenseSidecar/Simulator.swift`
 
 ## Internal structure
 

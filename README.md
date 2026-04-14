@@ -1,12 +1,12 @@
-# vscode-knock-demo
+# tapsense
 
 Prototype monorepo for a MacBook knock-triggered VS Code notification.
 
 ## Projects
 
-- `vscode-extension/` - VS Code extension in TypeScript
-- `knock-sidecar/` - macOS sidecar binary in Swift
-- `mac-menu-app/` - native macOS menu bar controller app in Swift
+- `tapsense-vscode/` - VS Code extension in TypeScript
+- `tapsense-sidecar/` - macOS sidecar binary in Swift
+- `tapsense-app/` - native macOS menu bar controller app in Swift
 
 ## Demo goal
 
@@ -32,21 +32,21 @@ Supported patterns today:
 ## Repo layout
 
 ```text
-vscode-knock-demo/
+tapsense/
 ├── README.md
 ├── docs/
-├── knock-sidecar/
-├── mac-menu-app/
-└── vscode-extension/
+├── tapsense-sidecar/
+├── tapsense-app/
+└── tapsense-vscode/
 ```
 
 ## Design docs
 
 - `docs/architecture.md` - overall system design and event flow
-- `docs/vscode-extension.md` - how the extension starts the sidecar and handles events
-- `docs/knock-sidecar.md` - how the sidecar is structured and how knock detection works
+- `docs/tapsense-vscode.md` - how the extension starts the sidecar and handles events
+- `docs/tapsense-sidecar.md` - how the sidecar is structured and how knock detection works
 - `docs/compatibility.md` - provisional hardware compatibility matrix for the private sensor path
-- `docs/mac-menu-app.md` - architecture and MVP implementation notes for the native macOS menu bar controller app
+- `docs/tapsense-app.md` - architecture and MVP implementation notes for the native macOS menu bar controller app
 - `docs/distribution.md` - bundled app layout and future GitHub/Homebrew distribution notes
 
 ## Installation
@@ -62,19 +62,19 @@ vscode-knock-demo/
 ### Clone and install
 
 ```bash
-git clone <your-repo-url> ~/GitHub/vscode-knock-demo
-cd ~/GitHub/vscode-knock-demo
+git clone <your-repo-url> ~/GitHub/tapsense
+cd ~/GitHub/tapsense
 ./build.sh
 ```
 
-This installs extension dependencies, builds the Swift sidecar, compiles the extension, builds the menu bar executable, and assembles a bundled `KnockMenu.app`.
+This installs extension dependencies, builds the Swift sidecar, compiles the extension, builds the menu bar executable, and assembles a bundled `TapSense.app`.
 
 ## Getting started
 
 Fastest path for the first demo:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo
+cd ~/GitHub/tapsense
 ./build.sh
 code .
 ```
@@ -83,29 +83,29 @@ Then:
 
 1. In VS Code, open the repo root.
 2. Press `F5` to launch the Extension Development Host.
-3. In the Extension Development Host, run `Knock: Start Listening`.
-4. Keep `knock.simulateMode` enabled.
+3. In the Extension Development Host, run `TapSense: Start Listening`.
+4. Keep `tapsense.simulateMode` enabled.
 5. Wait a few seconds for the simulated double-knock.
 6. You should see notifications for the simulated knock patterns.
 
 ## One-command build
 
 ```bash
-cd ~/GitHub/vscode-knock-demo
+cd ~/GitHub/tapsense
 ./build.sh
 ```
 
 ## 1) Build the sidecar
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/knock-sidecar
+cd ~/GitHub/tapsense/tapsense-sidecar
 swift build -c release
 ```
 
 Binary path:
 
 ```bash
-~/GitHub/vscode-knock-demo/knock-sidecar/.build/release/KnockSidecar
+~/GitHub/tapsense/tapsense-sidecar/.build/release/TapSenseSidecar
 ```
 
 ### Quick sidecar test
@@ -113,8 +113,8 @@ Binary path:
 Simulation mode:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/knock-sidecar
-.build/release/KnockSidecar --simulate
+cd ~/GitHub/tapsense/tapsense-sidecar
+.build/release/TapSenseSidecar --simulate
 ```
 
 You should see JSON events for `single`, `double`, and `triple` knock patterns.
@@ -122,8 +122,8 @@ You should see JSON events for `single`, `double`, and `triple` knock patterns.
 Experimental real mode:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/knock-sidecar
-.build/release/KnockSidecar
+cd ~/GitHub/tapsense/tapsense-sidecar
+.build/release/TapSenseSidecar
 ```
 
 If the private Apple Silicon accelerometer is not visible, the sidecar exits and tells you to use simulate mode.
@@ -131,7 +131,7 @@ If the private Apple Silicon accelerometer is not visible, the sidecar exits and
 ## 2) Build the VS Code extension
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/vscode-extension
+cd ~/GitHub/tapsense/tapsense-vscode
 npm install
 npm run compile
 ```
@@ -141,21 +141,21 @@ npm run compile
 Build:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/mac-menu-app
+cd ~/GitHub/tapsense/tapsense-app
 swift build -c release
 ```
 
 Run the raw executable:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/mac-menu-app
-./.build/release/KnockMenuApp
+cd ~/GitHub/tapsense/tapsense-app
+./.build/release/TapSenseApp
 ```
 
 Or launch the bundled app:
 
 ```bash
-open ~/GitHub/vscode-knock-demo/dist/KnockMenu.app
+open ~/GitHub/tapsense/dist/TapSense.app
 ```
 
 Current MVP menu actions:
@@ -167,14 +167,14 @@ Current MVP menu actions:
 - view status and last event
 - send a test notification-style alert
 
-Note: the repo now produces a real `.app` bundle layout in `dist/KnockMenu.app`, but it is not code-signed or notarized yet.
+Note: the repo now produces a real `.app` bundle layout in `dist/TapSense.app`, but it is not code-signed or notarized yet.
 
 ## 4) Run the extension in VS Code
 
-1. Open `~/GitHub/vscode-knock-demo` in VS Code.
+1. Open `~/GitHub/tapsense` in VS Code.
 2. Press `F5` to launch the Extension Development Host.
-3. In the Extension Development Host, run `Knock: Start Listening` from the command palette.
-4. Keep `knock.simulateMode` enabled for the first demo.
+3. In the Extension Development Host, run `TapSense: Start Listening` from the command palette.
+4. Keep `tapsense.simulateMode` enabled for the first demo.
 5. Wait a few seconds. The sidecar will cycle through simulated single, double, and triple knocks, and VS Code should react using notifications or configured commands.
 
 ## Installing the extension for local use
@@ -205,9 +205,9 @@ If Google Anti-Gravity is VS Code-compatible in your environment and exposes com
 
 ```json
 {
-  "knock.doubleKnock.command": "the.actual.command.id.behind.cmdL",
-  "knock.doubleKnock.args": [],
-  "knock.doubleKnock.showNotification": true
+  "tapsense.doubleKnock.command": "the.actual.command.id.behind.cmdL",
+  "tapsense.doubleKnock.args": [],
+  "tapsense.doubleKnock.showNotification": true
 }
 ```
 
@@ -226,7 +226,7 @@ This is the easiest path and is recommended for now:
 If you want it as an installable local extension:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/vscode-extension
+cd ~/GitHub/tapsense/tapsense-vscode
 npm install -g @vscode/vsce
 vsce package
 ```
@@ -240,40 +240,40 @@ Then in VS Code:
 After installation, make sure the sidecar binary exists at:
 
 ```bash
-~/GitHub/vscode-knock-demo/knock-sidecar/.build/release/KnockSidecar
+~/GitHub/tapsense/tapsense-sidecar/.build/release/TapSenseSidecar
 ```
 
-Or set `knock.sidecarPath` to a custom binary path in VS Code settings.
+Or set `tapsense.sidecarPath` to a custom binary path in VS Code settings.
 
 ## Useful commands
 
-- `Knock: Start Listening`
-- `Knock: Stop Listening`
-- `Knock: Test Single Knock`
-- `Knock: Test Double Knock`
-- `Knock: Test Triple Knock`
+- `TapSense: Start Listening`
+- `TapSense: Stop Listening`
+- `TapSense: Test Single Knock`
+- `TapSense: Test Double Knock`
+- `TapSense: Test Triple Knock`
 
 ## Extension settings
 
 Core settings:
 
-- `knock.sidecarPath`: optional explicit path to the sidecar binary
-- `knock.simulateMode`: run sidecar in simulation mode, default `true`
-- `knock.mode`: sidecar detection profile, `palmRest` or `desk`, default `palmRest`
-- `knock.sensitivity`: sidecar detection sensitivity, `low`, `medium`, or `high`, default `medium`
-- `knock.autoStart`: auto-start listener after activation, default `false`
+- `tapsense.sidecarPath`: optional explicit path to the sidecar binary
+- `tapsense.simulateMode`: run sidecar in simulation mode, default `true`
+- `tapsense.mode`: sidecar detection profile, `palmRest` or `desk`, default `palmRest`
+- `tapsense.sensitivity`: sidecar detection sensitivity, `low`, `medium`, or `high`, default `medium`
+- `tapsense.autoStart`: auto-start listener after activation, default `false`
 
 Pattern action settings:
 
-- `knock.singleKnock.command`
-- `knock.singleKnock.args`
-- `knock.singleKnock.showNotification`
-- `knock.doubleKnock.command`
-- `knock.doubleKnock.args`
-- `knock.doubleKnock.showNotification`
-- `knock.tripleKnock.command`
-- `knock.tripleKnock.args`
-- `knock.tripleKnock.showNotification`
+- `tapsense.singleKnock.command`
+- `tapsense.singleKnock.args`
+- `tapsense.singleKnock.showNotification`
+- `tapsense.doubleKnock.command`
+- `tapsense.doubleKnock.args`
+- `tapsense.doubleKnock.showNotification`
+- `tapsense.tripleKnock.command`
+- `tapsense.tripleKnock.args`
+- `tapsense.tripleKnock.showNotification`
 
 ### Example: map a knock to the action behind `Cmd+L`
 
@@ -281,9 +281,9 @@ In VS Code on macOS, `Cmd+L` maps to the command id `expandLineSelection`.
 
 ```json
 {
-  "knock.doubleKnock.command": "expandLineSelection",
-  "knock.doubleKnock.args": [],
-  "knock.doubleKnock.showNotification": true
+  "tapsense.doubleKnock.command": "expandLineSelection",
+  "tapsense.doubleKnock.args": [],
+  "tapsense.doubleKnock.showNotification": true
 }
 ```
 
@@ -293,9 +293,9 @@ If another extension contributes a command id, you can point a knock pattern at 
 
 ```json
 {
-  "knock.tripleKnock.command": "someExtension.someCommand",
-  "knock.tripleKnock.args": ["example"],
-  "knock.tripleKnock.showNotification": true
+  "tapsense.tripleKnock.command": "someExtension.someCommand",
+  "tapsense.tripleKnock.args": ["example"],
+  "tapsense.tripleKnock.showNotification": true
 }
 ```
 

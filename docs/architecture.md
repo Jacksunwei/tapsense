@@ -26,7 +26,7 @@ This split keeps the extension simple and makes the sensor code replaceable.
 ```text
 Physical knock or simulated knock
         ↓
-knock-sidecar sensor source
+tapsense-sidecar sensor source
         ↓
 KnockDetector classifies knock pattern
         ↓

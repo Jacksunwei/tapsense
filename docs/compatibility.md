@@ -34,7 +34,7 @@ Source:
 The Knock app markets itself as controlling your Mac with taps and public reverse-engineering references describe it as using the built-in accelerometer in Apple Silicon MacBooks.
 
 Source:
-- Knock: https://www.tryknock.app/
+- TapSense: https://www.tryknock.app/
 
 ## Important caveat
 

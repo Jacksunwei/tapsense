@@ -16,7 +16,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         }
 
         if let button = statusItem.button {
-            button.title = "Knock"
+            button.title = "TapSense"
         }
 
         let menu = NSMenu()
@@ -49,7 +49,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
     private func makeModeMenu() -> NSMenuItem {
         let modeItem = NSMenuItem(title: "Mode", action: nil, keyEquivalent: "")
         let submenu = NSMenu()
-        for mode in MenuKnockMode.allCases {
+        for mode in TapSenseMode.allCases {
             let item = NSMenuItem(title: mode.title, action: #selector(selectMode(_:)), keyEquivalent: "")
             item.target = self
             item.representedObject = mode.rawValue
@@ -62,7 +62,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
     private func makeSensitivityMenu() -> NSMenuItem {
         let item = NSMenuItem(title: "Sensitivity", action: nil, keyEquivalent: "")
         let submenu = NSMenu()
-        for sensitivity in MenuKnockSensitivity.allCases {
+        for sensitivity in TapSenseSensitivity.allCases {
             let child = NSMenuItem(title: sensitivity.title, action: #selector(selectSensitivity(_:)), keyEquivalent: "")
             child.target = self
             child.representedObject = sensitivity.rawValue
@@ -79,7 +79,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         simulateMenuItem.state = controller.simulateMode ? .on : .off
         updateSubmenuStates()
         if let button = statusItem.button {
-            button.title = controller.isRunning ? "Knock●" : "Knock"
+            button.title = controller.isRunning ? "TapSense●" : "TapSense"
         }
     }
 
@@ -88,10 +88,10 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
             guard let submenu = item.submenu else { return }
             for child in submenu.items {
                 if let raw = child.representedObject as? String,
-                   let mode = MenuKnockMode(rawValue: raw) {
+                   let mode = TapSenseMode(rawValue: raw) {
                     child.state = mode == controller.mode ? .on : .off
                 } else if let raw = child.representedObject as? String,
-                          let sensitivity = MenuKnockSensitivity(rawValue: raw) {
+                          let sensitivity = TapSenseSensitivity(rawValue: raw) {
                     child.state = sensitivity == controller.sensitivity ? .on : .off
                 }
             }
@@ -114,7 +114,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
 
     @objc private func selectMode(_ sender: NSMenuItem) {
         guard let raw = sender.representedObject as? String,
-              let mode = MenuKnockMode(rawValue: raw) else { return }
+              let mode = TapSenseMode(rawValue: raw) else { return }
         controller.mode = mode
         if controller.isRunning {
             controller.stop()
@@ -126,7 +126,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
 
     @objc private func selectSensitivity(_ sender: NSMenuItem) {
         guard let raw = sender.representedObject as? String,
-              let sensitivity = MenuKnockSensitivity(rawValue: raw) else { return }
+              let sensitivity = TapSenseSensitivity(rawValue: raw) else { return }
         controller.sensitivity = sensitivity
         if controller.isRunning {
             controller.stop()

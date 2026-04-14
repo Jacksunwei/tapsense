@@ -1,6 +1,6 @@
 import Foundation
 
-enum MenuKnockMode: String, CaseIterable {
+enum TapSenseMode: String, CaseIterable {
     case palmRest
     case desk
 
@@ -12,7 +12,7 @@ enum MenuKnockMode: String, CaseIterable {
     }
 }
 
-enum MenuKnockSensitivity: String, CaseIterable {
+enum TapSenseSensitivity: String, CaseIterable {
     case low
     case medium
     case high

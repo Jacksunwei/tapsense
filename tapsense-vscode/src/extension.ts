@@ -30,51 +30,51 @@ type SidecarLaunchOptions = {
 };
 
 export function activate(context: vscode.ExtensionContext) {
-  outputChannel = vscode.window.createOutputChannel("Knock Detector");
+  outputChannel = vscode.window.createOutputChannel("TapSense");
 
   statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100,
   );
-  statusBarItem.command = "knock.start";
-  statusBarItem.text = "$(pulse) Knock: Off";
+  statusBarItem.command = "tapsense.start";
+  statusBarItem.text = "$(pulse) TapSense: Off";
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("knock.start", startListening),
-    vscode.commands.registerCommand("knock.stop", stopListening),
-    vscode.commands.registerCommand("knock.testSingle", () =>
+    vscode.commands.registerCommand("tapsense.start", startListening),
+    vscode.commands.registerCommand("tapsense.stop", stopListening),
+    vscode.commands.registerCommand("tapsense.testSingle", () =>
       triggerPattern("single", true),
     ),
-    vscode.commands.registerCommand("knock.testDouble", () =>
+    vscode.commands.registerCommand("tapsense.testDouble", () =>
       triggerPattern("double", true),
     ),
-    vscode.commands.registerCommand("knock.testTriple", () =>
+    vscode.commands.registerCommand("tapsense.testTriple", () =>
       triggerPattern("triple", true),
     ),
   );
 
-  const config = vscode.workspace.getConfiguration("knock");
+  const config = vscode.workspace.getConfiguration("tapsense");
   if (config.get<boolean>("autoStart")) {
     startListening();
   }
 }
 
 function getSidecarPath(): string {
-  const config = vscode.workspace.getConfiguration("knock");
+  const config = vscode.workspace.getConfiguration("tapsense");
   const custom = config.get<string>("sidecarPath");
   if (custom) {
     return custom;
   }
   const extensionDir = path.resolve(__dirname, "..", "..");
   const repoRoot = path.resolve(extensionDir, "..");
-  return path.join(repoRoot, "knock-sidecar", ".build", "release", "KnockSidecar");
+  return path.join(repoRoot, "tapsense-sidecar", ".build", "release", "TapSenseSidecar");
 }
 
 function startListening() {
   if (sidecarProcess) {
-    vscode.window.showWarningMessage("Knock detector is already running.");
+    vscode.window.showWarningMessage("TapSense detector is already running.");
     return;
   }
 
@@ -95,7 +95,7 @@ function startListening() {
 
   if (!fs.existsSync(binary)) {
     vscode.window.showErrorMessage(
-      `Knock sidecar binary not found at ${binary}. Build it first with: cd knock-sidecar && swift build -c release`,
+      `TapSense sidecar binary not found at ${binary}. Build it first with: cd tapsense-sidecar && swift build -c release`,
     );
     return;
   }
@@ -107,7 +107,7 @@ function startListening() {
     sidecarProcess = spawned;
   } catch (err) {
     vscode.window.showErrorMessage(
-      `Failed to start knock sidecar: ${err}. Build it first with: cd knock-sidecar && swift build -c release`,
+      `Failed to start knock sidecar: ${err}. Build it first with: cd tapsense-sidecar && swift build -c release`,
     );
     return;
   }
@@ -117,7 +117,7 @@ function startListening() {
   processForHandlers.on("error", (err) => {
     outputChannel.appendLine(`Sidecar error: ${err.message}`);
     vscode.window.showErrorMessage(
-      `Knock sidecar error: ${err.message}. Make sure the binary is built.`,
+      `TapSense sidecar error: ${err.message}. Make sure the binary is built.`,
     );
     cleanup(processForHandlers);
   });
@@ -152,15 +152,15 @@ function startListening() {
     });
   }
 
-  statusBarItem.text = "$(pulse) Knock: Listening";
-  statusBarItem.command = "knock.stop";
+  statusBarItem.text = "$(pulse) TapSense: Listening";
+  statusBarItem.command = "tapsense.stop";
   vscode.window.showInformationMessage(
-    `Knock detector started${launchOptions.simulate ? " (simulate mode)" : ""}.`,
+    `TapSense detector started${launchOptions.simulate ? " (simulate mode)" : ""}.`,
   );
 }
 
 function getSidecarLaunchOptions(): SidecarLaunchOptions {
-  const config = vscode.workspace.getConfiguration("knock");
+  const config = vscode.workspace.getConfiguration("tapsense");
   return {
     simulate: config.get<boolean>("simulateMode", true),
     mode: getEnumConfig<KnockMode>("mode", "palmRest", ["palmRest", "desk"]),
@@ -177,7 +177,7 @@ function getEnumConfig<T extends string>(
   fallback: T,
   allowed: readonly T[],
 ): T {
-  const value = vscode.workspace.getConfiguration("knock").get<string>(key);
+  const value = vscode.workspace.getConfiguration("tapsense").get<string>(key);
   if (value && allowed.includes(value as T)) {
     return value as T;
   }
@@ -210,7 +210,7 @@ async function triggerPattern(
   manualTest = false,
   _event?: KnockEvent,
 ) {
-  const config = vscode.workspace.getConfiguration("knock");
+  const config = vscode.workspace.getConfiguration("tapsense");
   const shouldNotify = config.get<boolean>(`${pattern}Knock.showNotification`, true);
   const command = config.get<string>(`${pattern}Knock.command`, "").trim();
   const commandArgs = config.get<unknown[]>(`${pattern}Knock.args`, []);
@@ -239,7 +239,7 @@ async function triggerPattern(
       `Command execution failed for ${pattern} knock (${command}): ${message}`,
     );
     void vscode.window.showErrorMessage(
-      `Knock action failed for ${pattern} knock: ${message}`,
+      `TapSense action failed for ${pattern} knock: ${message}`,
     );
   }
 }
@@ -250,12 +250,12 @@ function capitalize(value: string): string {
 
 function stopListening() {
   if (!sidecarProcess) {
-    vscode.window.showWarningMessage("Knock detector is not running.");
+    vscode.window.showWarningMessage("TapSense detector is not running.");
     return;
   }
   sidecarProcess.kill("SIGINT");
   cleanup();
-  vscode.window.showInformationMessage("Knock detector stopped.");
+  vscode.window.showInformationMessage("TapSense detector stopped.");
 }
 
 function cleanup(expectedProcess?: cp.ChildProcess) {
@@ -263,8 +263,8 @@ function cleanup(expectedProcess?: cp.ChildProcess) {
     return;
   }
   sidecarProcess = null;
-  statusBarItem.text = "$(pulse) Knock: Off";
-  statusBarItem.command = "knock.start";
+  statusBarItem.text = "$(pulse) TapSense: Off";
+  statusBarItem.command = "tapsense.start";
 }
 
 export function deactivate() {

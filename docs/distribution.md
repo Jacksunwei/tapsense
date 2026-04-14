@@ -5,13 +5,13 @@
 The repo now produces a bundled macOS app at:
 
 ```text
-dist/KnockMenu.app
+dist/TapSense.app
 ```
 
 The bundle contains:
 
-- `Contents/MacOS/KnockMenuApp` - the native menu bar executable
-- `Contents/Resources/KnockSidecar` - the embedded sidecar binary
+- `Contents/MacOS/TapSenseApp` - the native menu bar executable
+- `Contents/Resources/TapSenseSidecar` - the embedded sidecar binary
 - `Contents/Info.plist` - app metadata
 
 ## Why this matters
@@ -27,27 +27,27 @@ This gets the project closer to a one-install user experience:
 Build everything:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo
+cd ~/GitHub/tapsense
 ./build.sh
 ```
 
 Package only the app bundle:
 
 ```bash
-cd ~/GitHub/vscode-knock-demo/mac-menu-app
+cd ~/GitHub/tapsense/tapsense-app
 ./package-app.sh
 ```
 
 Launch the bundle locally:
 
 ```bash
-open ~/GitHub/vscode-knock-demo/dist/KnockMenu.app
+open ~/GitHub/tapsense/dist/TapSense.app
 ```
 
 Or run the inner executable directly:
 
 ```bash
-~/GitHub/vscode-knock-demo/dist/KnockMenu.app/Contents/MacOS/KnockMenuApp
+~/GitHub/tapsense/dist/TapSense.app/Contents/MacOS/TapSenseApp
 ```
 
 ## GitHub account assumption
@@ -56,14 +56,14 @@ This repo is currently set up assuming future public hosting under Jack's GitHub
 
 Current bundle metadata uses:
 
-- bundle identifier: `com.jacksunwei.knockmenu`
-- app display name: `KnockMenu`
+- bundle identifier: `com.jacksunwei.tapsense`
+- app display name: `TapSense`
 
 These are set up assuming future public hosting under the `jacksunwei` GitHub handle and can still be refined when the final repo name and signing identity are chosen.
 
 ## Recommended future release flow
 
-1. build `dist/KnockMenu.app`
+1. build `dist/TapSense.app`
 2. zip the app bundle for release upload
 3. attach the zip as a GitHub Release asset
 4. add a Homebrew Cask pointing to that release asset
@@ -71,16 +71,16 @@ These are set up assuming future public hosting under the `jacksunwei` GitHub ha
 ## Example Homebrew Cask shape
 
 ```ruby
-cask "knockmenu" do
+cask "tapsense" do
   version "0.1.0"
   sha256 "..."
 
-  url "https://github.com/jacksunwei/vscode-knock-demo/releases/download/v#{version}/KnockMenu.app.zip"
-  name "KnockMenu"
+  url "https://github.com/jacksunwei/tapsense/releases/download/v#{version}/TapSense.app.zip"
+  name "TapSense"
   desc "Menu bar controller for MacBook knock detection"
-  homepage "https://github.com/jacksunwei/vscode-knock-demo"
+  homepage "https://github.com/jacksunwei/tapsense"
 
-  app "KnockMenu.app"
+  app "TapSense.app"
 end
 ```
 
