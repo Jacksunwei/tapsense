@@ -25,9 +25,16 @@ When the sidecar emits a `double_knock` event, the extension pops a VS Code noti
 ```text
 vscode-knock-demo/
 ├── README.md
+├── docs/
 ├── knock-sidecar/
 └── vscode-extension/
 ```
+
+## Design docs
+
+- `docs/architecture.md` - overall system design and event flow
+- `docs/vscode-extension.md` - how the extension starts the sidecar and handles events
+- `docs/knock-sidecar.md` - how the sidecar is structured and how knock detection works
 
 ## Installation
 
