@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import UserNotifications
 
 final class SidecarController: NSObject {
     private(set) var process: Process?
@@ -11,12 +12,14 @@ final class SidecarController: NSObject {
     private let jsonDecoder = JSONDecoder()
 
     var simulateMode = true
+    var testMode = false
     var mode: TapSenseMode = .palmRest
     var sensitivity: TapSenseSensitivity = .medium
     var onStateChange: (() -> Void)?
 
     override init() {
         super.init()
+        requestNotificationPermission()
     }
 
     func toggle() {
@@ -178,6 +181,9 @@ final class SidecarController: NSObject {
         case "tap_pattern":
             let pattern = event.pattern ?? "unknown"
             lastEventText = "Detected \(pattern) tap"
+            if testMode {
+                sendNotification(title: "TapSense Detected", body: "Pattern: \(pattern)")
+            }
         case "error":
             statusText = "Error"
             lastEventText = event.message ?? "Unknown error"
@@ -192,7 +198,21 @@ final class SidecarController: NSObject {
     }
 
     func sendTestNotification() {
-        showAlert(title: "TapSense app", message: "Test notification")
+        sendNotification(title: "TapSense Test", body: "Manual test notification triggered")
+    }
+
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+
+    private func sendNotification(title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
     }
 
     private func showAlert(title: String, message: String) {

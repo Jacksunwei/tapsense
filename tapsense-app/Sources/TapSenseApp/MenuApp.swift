@@ -8,6 +8,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
     private let lastEventMenuItem = NSMenuItem(title: "No events yet", action: nil, keyEquivalent: "")
     private let toggleMenuItem = NSMenuItem(title: "Start Listening", action: #selector(toggleListening), keyEquivalent: "")
     private let simulateMenuItem = NSMenuItem(title: "Simulate Mode", action: #selector(toggleSimulate), keyEquivalent: "")
+    private let testModeMenuItem = NSMenuItem(title: "Test Mode (Notify on Tap)", action: #selector(toggleTestMode), keyEquivalent: "")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -29,6 +30,10 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         simulateMenuItem.target = self
         simulateMenuItem.state = .on
         menu.addItem(simulateMenuItem)
+
+        testModeMenuItem.target = self
+        testModeMenuItem.state = .off
+        menu.addItem(testModeMenuItem)
 
         menu.addItem(makeModeMenu())
         menu.addItem(makeSensitivityMenu())
@@ -77,6 +82,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         lastEventMenuItem.title = controller.lastEventText
         toggleMenuItem.title = controller.isRunning ? "Stop Listening" : "Start Listening"
         simulateMenuItem.state = controller.simulateMode ? .on : .off
+        testModeMenuItem.state = controller.testMode ? .on : .off
         updateSubmenuStates()
         if let button = statusItem.button {
             button.title = controller.isRunning ? "TapSense●" : "TapSense"
@@ -110,6 +116,11 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         } else {
             refreshMenu()
         }
+    }
+
+    @objc private func toggleTestMode() {
+        controller.testMode.toggle()
+        refreshMenu()
     }
 
     @objc private func selectMode(_ sender: NSMenuItem) {
