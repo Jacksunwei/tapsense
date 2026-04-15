@@ -11,14 +11,28 @@ TapSense lets you trigger VS Code commands by physically tapping the palm rest o
 Run this in your terminal to install the latest version of TapSense:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jacksunwei/tapsense/main/install.sh | bash
+brew update
+brew install --cask jacksunwei/tap/tapsense
 ```
-
-*Requires [Homebrew](https://brew.sh).*
 
 ---
 
-## 🛠 Manual Installation (for Developers)
+## ⚠️ Security & Permissions
+
+Because TapSense is an open-source tool built on GitHub and is not yet digitally signed by an Apple Developer account, macOS will show a **"TapSense is damaged"** warning on the first launch.
+
+### 1. Fix the "Damaged" Warning
+Run this command in your terminal to tell macOS the app is safe:
+
+```bash
+sudo xattr -rd com.apple.quarantine /Applications/TapSense.app
+```
+
+### 2. Enable Sensor Access
+TapSense needs to monitor the accelerometer and keyboard (to ignore typing vibrations). When prompted, please grant **Input Monitoring** permissions in:
+`System Settings > Privacy & Security > Input Monitoring`
+
+---
 
 ## 🛠 How to Use (Real Hardware)
 

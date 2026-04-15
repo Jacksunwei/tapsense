@@ -36,5 +36,7 @@ fi
 
 echo ""
 echo "Next steps:"
-echo "1. Open /Applications/TapSense.app"
-echo "2. In VS Code, install the TapSense extension (tapsense-vscode.vsix from releases)"
+echo "1. Run this to fix the macOS 'Damaged App' warning:"
+echo "   sudo xattr -rd com.apple.quarantine /Applications/TapSense.app"
+echo "2. Open /Applications/TapSense.app"
+echo "3. In VS Code, install the TapSense extension (tapsense-vscode.vsix from releases)"
