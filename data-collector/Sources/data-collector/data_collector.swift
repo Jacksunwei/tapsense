@@ -28,7 +28,15 @@ struct DataCollector {
         
         let accelerometer = IOKitAccelerometer()
         
+        // Use the standard medium profile to count taps for UI feedback
+        let profile = ProfileFactory.make(sensitivity: .medium)
+        let detector = TapDetector(profile: profile)
+        
+        var tapCount = 0
+        var lastTapTime: TimeInterval = 0
+        
         let started = accelerometer.start { reading in
+            // 1. Record raw data
             let dict: [String: Any] = [
                 "t": reading.timestamp,
                 "x": reading.x,
@@ -43,6 +51,27 @@ struct DataCollector {
                     fileHandle.write(lineData)
                 }
             }
+            
+            // 2. Provide real-time feedback on pace
+            if let _ = detector.process(reading) {
+                tapCount += 1
+                let now = reading.timestamp
+                
+                var feedback = ""
+                if tapCount > 1 {
+                    let interval = now - lastTapTime
+                    if interval < 1.5 {
+                        feedback = "⚠️ Too fast! Wait a bit longer."
+                    } else if interval > 3.0 {
+                        feedback = "🐢 A bit slow. Keep a steady pace."
+                    } else {
+                        feedback = "✅ Good pace!"
+                    }
+                }
+                
+                lastTapTime = now
+                print("Recorded tap #\(tapCount) \(feedback)")
+            }
         }
         
         if !started {
@@ -55,8 +84,6 @@ struct DataCollector {
         // Run the run loop to keep the tool alive and receiving callbacks
         RunLoop.current.run()
         
-        // This point is never reached unless the run loop is stopped, 
-        // but it's good practice to close the handle.
         try? fileHandle.close()
     }
 }
