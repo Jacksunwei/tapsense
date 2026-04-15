@@ -2,8 +2,8 @@ import Foundation
 
 struct SidecarOptions {
     let simulate: Bool
-    let mode: TapMode
     let sensitivity: TapSensitivity
+    let thresholdOverride: Double?
 }
 
 func emitJSON(_ dict: [String: Any]) {
@@ -15,8 +15,8 @@ func emitJSON(_ dict: [String: Any]) {
 
 func parseOptions(arguments: [String]) -> SidecarOptions {
     var simulate = false
-    var mode: TapMode = .palmRest
     var sensitivity: TapSensitivity = .medium
+    var thresholdOverride: Double? = nil
 
     var index = 1
     while index < arguments.count {
@@ -24,16 +24,15 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
         switch argument {
         case "--simulate":
             simulate = true
-        case "--mode":
-            if index + 1 < arguments.count,
-               let parsed = TapMode(rawValue: arguments[index + 1]) {
-                mode = parsed
-                index += 1
-            }
         case "--sensitivity":
             if index + 1 < arguments.count,
                let parsed = TapSensitivity(rawValue: arguments[index + 1]) {
                 sensitivity = parsed
+                index += 1
+            }
+        case "--threshold":
+            if index + 1 < arguments.count, let parsed = Double(arguments[index + 1]) {
+                thresholdOverride = parsed
                 index += 1
             }
         default:
@@ -42,11 +41,24 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
         index += 1
     }
 
-    return SidecarOptions(simulate: simulate, mode: mode, sensitivity: sensitivity)
+    return SidecarOptions(simulate: simulate, sensitivity: sensitivity, thresholdOverride: thresholdOverride)
 }
 
 let options = parseOptions(arguments: CommandLine.arguments)
-let profile = ProfileFactory.make(mode: options.mode, sensitivity: options.sensitivity)
+let baseProfile = ProfileFactory.make(sensitivity: options.sensitivity)
+let profile: DetectorProfile
+if let override = options.thresholdOverride {
+    profile = DetectorProfile(
+        sensitivity: baseProfile.sensitivity,
+        magnitudeThreshold: override,
+        minGapMs: baseProfile.minGapMs,
+        maxGapMs: baseProfile.maxGapMs,
+        cooldownMs: baseProfile.cooldownMs
+    )
+    fputs("[sidecar] Threshold override: \(override) g\n", stderr)
+} else {
+    profile = baseProfile
+}
 
 let source: AccelerometerSource
 if options.simulate {
@@ -57,8 +69,40 @@ if options.simulate {
 
 let detector = TapDetector(profile: profile)
 
+fputs(String(format: "[sidecar] sens=%@ threshold=%.3fg refractory=%.0fms maxGap=%.0fms\n",
+             options.sensitivity.rawValue,
+             profile.magnitudeThreshold, profile.minGapMs, profile.maxGapMs), stderr)
+
+let keyMonitor = KeyMonitor()
+let keyStarted = keyMonitor.start()
+if !keyStarted {
+    fputs("[sidecar] WARNING: keyboard monitor failed — typing will NOT be suppressed.\n", stderr)
+}
+let keySuppressionSec: TimeInterval = 0.200   // skip samples within 200ms AFTER a key event
+let keyLookaheadSec: TimeInterval = 0.500     // delay emit 500ms — cancel if any key fires during window
+
 let started = source.start { reading in
-    if let event = detector.process(reading) {
+    let sinceKey = reading.timestamp - keyMonitor.lastKeyEventTime
+    if sinceKey >= 0 && sinceKey < keySuppressionSec {
+        return
+    }
+    guard let event = detector.process(reading) else { return }
+
+    let detectedAt = event.timestamp
+    let keyCountAtDetect = keyMonitor.eventCount
+    let delayMs = Int(keyLookaheadSec * 1000)
+    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(delayMs)) {
+        // If a new key event fired during the lookahead window, assume the tap was
+        // typing vibration and suppress. Also check same-window keys that arrived
+        // slightly after detection.
+        if keyMonitor.eventCount > keyCountAtDetect {
+            fputs("[sidecar] Suppressed tap (\(event.pattern)) — key event in lookahead window.\n", stderr)
+            return
+        }
+        if keyMonitor.lastKeyEventTime > detectedAt - keySuppressionSec {
+            fputs("[sidecar] Suppressed tap (\(event.pattern)) — recent key event.\n", stderr)
+            return
+        }
         emitJSON([
             "type": "tap_pattern",
             "pattern": event.pattern,
@@ -77,7 +121,6 @@ if !started {
 emitJSON([
     "type": "started",
     "mode": options.simulate ? "simulate" : "real",
-    "profile": options.mode.rawValue,
     "sensitivity": options.sensitivity.rawValue,
 ])
 
@@ -90,4 +133,4 @@ sigintSource.setEventHandler {
 }
 sigintSource.resume()
 
-dispatchMain()
+RunLoop.main.run()

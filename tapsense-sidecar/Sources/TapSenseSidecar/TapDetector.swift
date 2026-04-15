@@ -6,55 +6,61 @@ struct TapEvent {
 
     var pattern: String {
         switch count {
-        case 1:
-            return "single"
-        case 2:
-            return "double"
-        default:
-            return "triple"
+        case 1: return "single"
+        case 2: return "double"
+        default: return "triple"
         }
     }
 }
 
+/// State machine:
+///   IDLE  -- magnitude > threshold + confirmed N samples --> FIRE a tap, record timestamp,
+///            enter REFRACTORY (ignore all input for `refractoryMs`)
+///   REFRACTORY -- refractoryMs elapsed --> IDLE
+///
+/// Pattern emission: after each fired tap, wait `maxGapMs` for the next tap.
+/// If no next tap arrives within that window, emit the accumulated count.
+/// If `maxTapsPerPattern` taps accumulate, emit immediately.
 final class TapDetector {
     private let magnitudeThreshold: Double
     private let maxGapMs: Double
-    private let minGapMs: Double
+    private let refractoryMs: Double
     private let cooldownMs: Double
     private let maxTapsPerPattern: Int
     private let confirmSamples: Int
-    private let releaseRatio: Double
 
-    private var tapTimes: [TimeInterval] = []
+    private var tapCount: Int = 0
+    private var firstTapTime: TimeInterval = 0
+    private var lastTapTime: TimeInterval = 0
     private var lastEmitTime: TimeInterval = 0
 
-    // High-pass filter state (per-axis gravity removal)
     private let gravityAlpha: Double = 0.95
     private var gravityX: Double = 0
     private var gravityY: Double = 0
     private var gravityZ: Double = 0
     private var gravityInitialized = false
 
-    // Peak confirmation state
     private var consecutiveAbove: Int = 0
-    private var tapFired: Bool = false
+    private var refractoryUntil: TimeInterval = 0
+    private var armed: Bool = true  // false after firing until magnitude dips below release
+    private var belowCount: Int = 0
+    private let releaseRatio: Double = 0.6  // must drop below 60% of threshold to re-arm
+    private let releaseSamples: Int = 3
 
     init(
-        magnitudeThreshold: Double = 0.5,
-        minGapMs: Double = 50,
-        maxGapMs: Double = 400,
-        cooldownMs: Double = 1000,
+        magnitudeThreshold: Double = 0.20,
+        minGapMs: Double = 60,
+        maxGapMs: Double = 320,
+        cooldownMs: Double = 900,
         maxTapsPerPattern: Int = 3,
-        confirmSamples: Int = 2,
-        releaseRatio: Double = 0.5
+        confirmSamples: Int = 2
     ) {
         self.magnitudeThreshold = magnitudeThreshold
-        self.minGapMs = minGapMs
+        self.refractoryMs = minGapMs
         self.maxGapMs = maxGapMs
         self.cooldownMs = cooldownMs
         self.maxTapsPerPattern = maxTapsPerPattern
         self.confirmSamples = confirmSamples
-        self.releaseRatio = releaseRatio
         self.lastEmitTime = -(cooldownMs / 1000)
     }
 
@@ -71,29 +77,62 @@ final class TapDetector {
     func process(_ reading: AccelerometerReading) -> TapEvent? {
         let now = reading.timestamp
 
-        if let event = finalizeIfTimedOut(now: now) {
-            return event
+        if tapCount > 0 && (now - lastTapTime) * 1000 > maxGapMs {
+            return emitPattern()
         }
 
         let magnitude = filteredMagnitude(reading)
-        let releaseThreshold = magnitudeThreshold * releaseRatio
+
+        // Re-arming: after a tap fires, require N consecutive samples below release threshold
+        // AND the refractory window to elapse before we can fire again.
+        if !armed {
+            if magnitude < magnitudeThreshold * releaseRatio {
+                belowCount += 1
+            } else {
+                belowCount = 0
+            }
+            if belowCount >= releaseSamples && now >= refractoryUntil {
+                armed = true
+                belowCount = 0
+                consecutiveAbove = 0
+            }
+            return nil
+        }
 
         if magnitude > magnitudeThreshold {
             consecutiveAbove += 1
-        } else if magnitude < releaseThreshold {
-            consecutiveAbove = 0
-            tapFired = false
-            return nil
         } else {
+            consecutiveAbove = 0
             return nil
         }
 
-        guard consecutiveAbove >= confirmSamples && !tapFired else {
-            return nil
+        guard consecutiveAbove >= confirmSamples else { return nil }
+        consecutiveAbove = 0
+        armed = false
+        refractoryUntil = now + refractoryMs / 1000
+
+        if tapCount == 0 {
+            let sinceLastEmitMs = (now - lastEmitTime) * 1000
+            if sinceLastEmitMs < cooldownMs { return nil }
+            firstTapTime = now
         }
 
-        tapFired = true
-        return registerTap(at: now)
+        tapCount += 1
+        lastTapTime = now
+
+        if tapCount >= maxTapsPerPattern {
+            return emitPattern()
+        }
+        return nil
+    }
+
+    private func emitPattern() -> TapEvent? {
+        guard tapCount > 0 else { return nil }
+        let count = min(tapCount, maxTapsPerPattern)
+        let ts = firstTapTime
+        tapCount = 0
+        lastEmitTime = lastTapTime
+        return TapEvent(count: count, timestamp: ts)
     }
 
     private func filteredMagnitude(_ reading: AccelerometerReading) -> Double {
@@ -112,60 +151,6 @@ final class TapDetector {
         let ax = reading.x - gravityX
         let ay = reading.y - gravityY
         let az = reading.z - gravityZ
-
         return sqrt(ax * ax + ay * ay + az * az)
-    }
-
-    private func finalizeIfTimedOut(now: TimeInterval) -> TapEvent? {
-        guard let lastTapTime = tapTimes.last else {
-            return nil
-        }
-
-        let elapsedMs = (now - lastTapTime) * 1000
-        guard elapsedMs > maxGapMs else {
-            return nil
-        }
-
-        return emitCurrentPattern(timestamp: lastTapTime)
-    }
-
-    private func registerTap(at now: TimeInterval) -> TapEvent? {
-        let sinceLastEmitMs = (now - lastEmitTime) * 1000
-        if tapTimes.isEmpty && sinceLastEmitMs < cooldownMs {
-            return nil
-        }
-
-        if let previous = tapTimes.last {
-            let gapMs = (now - previous) * 1000
-
-            if gapMs < minGapMs {
-                return nil
-            }
-
-            if gapMs > maxGapMs {
-                let event = emitCurrentPattern(timestamp: previous)
-                tapTimes = [now]
-                return event
-            }
-        }
-
-        tapTimes.append(now)
-
-        if tapTimes.count >= maxTapsPerPattern {
-            return emitCurrentPattern(timestamp: now)
-        }
-
-        return nil
-    }
-
-    private func emitCurrentPattern(timestamp: TimeInterval) -> TapEvent? {
-        guard !tapTimes.isEmpty else {
-            return nil
-        }
-
-        let count = min(tapTimes.count, maxTapsPerPattern)
-        tapTimes.removeAll(keepingCapacity: true)
-        lastEmitTime = timestamp
-        return TapEvent(count: count, timestamp: timestamp)
     }
 }

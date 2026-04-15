@@ -5,9 +5,33 @@
       "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}/tapsense-vscode"],
-      "outFiles": ["${workspaceFolder}/tapsense-vscode/out/**/*.js"],
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/tapsense-vscode"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/tapsense-vscode/out/**/*.js"
+      ],
       "preLaunchTask": "npm: compile - tapsense-vscode"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:tapsense}/tapsense-sidecar",
+      "name": "Debug TapSenseSidecar (tapsense-sidecar)",
+      "target": "TapSenseSidecar",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug TapSenseSidecar (tapsense-sidecar)"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:tapsense}/tapsense-sidecar",
+      "name": "Release TapSenseSidecar (tapsense-sidecar)",
+      "target": "TapSenseSidecar",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release TapSenseSidecar (tapsense-sidecar)"
     }
   ]
 }

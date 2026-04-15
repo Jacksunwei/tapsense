@@ -1,17 +1,5 @@
 import Foundation
 
-enum TapSenseMode: String, CaseIterable {
-    case palmRest
-    case desk
-
-    var title: String {
-        switch self {
-        case .palmRest: return "Palm Rest"
-        case .desk: return "Desk"
-        }
-    }
-}
-
 enum TapSenseSensitivity: String, CaseIterable {
     case low
     case medium

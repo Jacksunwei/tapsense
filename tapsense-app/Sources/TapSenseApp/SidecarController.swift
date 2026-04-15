@@ -11,9 +11,8 @@ final class SidecarController: NSObject {
     private var stderrBuffer = ""
     private let jsonDecoder = JSONDecoder()
 
-    var simulateMode = true
-    var testMode = false
-    var mode: TapSenseMode = .palmRest
+    var simulateMode = false
+    var testMode = true
     var sensitivity: TapSenseSensitivity = .medium
     var onStateChange: (() -> Void)?
 
@@ -35,6 +34,17 @@ final class SidecarController: NSObject {
             lastEventText = "Build tapsense-sidecar first: ./build.sh"
             onStateChange?()
             return
+        }
+
+        // Real accelerometer + CGEventTap both need root. If user wants real mode,
+        // make sure the sidecar binary is setuid-root. Prompt once via AppleScript.
+        if !simulateMode && !isSetuidRoot(at: binary) {
+            guard elevateBinary(at: binary) else {
+                statusText = "Needs privileges"
+                lastEventText = "Grant admin to enable real tap detection, or use Simulate Mode."
+                onStateChange?()
+                return
+            }
         }
 
         let process = Process()
@@ -106,7 +116,7 @@ final class SidecarController: NSObject {
     }
 
     private func buildArguments() -> [String] {
-        var args: [String] = ["--mode", mode.rawValue, "--sensitivity", sensitivity.rawValue]
+        var args: [String] = ["--sensitivity", sensitivity.rawValue]
         if simulateMode {
             args.append("--simulate")
         }
@@ -175,9 +185,8 @@ final class SidecarController: NSObject {
         switch event.type {
         case "started":
             statusText = "Running"
-            let profile = event.profile ?? mode.rawValue
             let sensitivity = event.sensitivity ?? self.sensitivity.rawValue
-            lastEventText = "Started (\(profile), \(sensitivity), \(simulateMode ? "simulate" : "real"))"
+            lastEventText = "Started (\(sensitivity), \(simulateMode ? "simulate" : "real"))"
         case "tap_pattern":
             let pattern = event.pattern ?? "unknown"
             lastEventText = "Detected \(pattern) tap"
@@ -206,13 +215,16 @@ final class SidecarController: NSObject {
     }
 
     private func sendNotification(title: String, body: String) {
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.sound = .default
-
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
+        // UNUserNotificationCenter requires a properly signed bundle with notification
+        // entitlements. For ad-hoc builds and dev use, osascript "display notification"
+        // is reliable and doesn't need a permission prompt.
+        let safeTitle = title.replacingOccurrences(of: "\"", with: "'")
+        let safeBody = body.replacingOccurrences(of: "\"", with: "'")
+        let script = "display notification \"\(safeBody)\" with title \"\(safeTitle)\" sound name \"Pop\""
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        task.arguments = ["-e", script]
+        try? task.run()
     }
 
     private func showAlert(title: String, message: String) {
@@ -221,6 +233,27 @@ final class SidecarController: NSObject {
         alert.informativeText = message
         alert.alertStyle = .informational
         alert.runModal()
+    }
+
+    private func isSetuidRoot(at url: URL) -> Bool {
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path) else { return false }
+        let posixPerms = (attrs[.posixPermissions] as? NSNumber)?.uint16Value ?? 0
+        let ownerID = (attrs[.ownerAccountID] as? NSNumber)?.uint32Value ?? UINT32_MAX
+        return ownerID == 0 && (posixPerms & 0o4000) != 0
+    }
+
+    private func elevateBinary(at url: URL) -> Bool {
+        let path = url.path.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = "do shell script \"chown root:wheel '\(path)' && chmod 4755 '\(path)'\" with administrator privileges"
+        var errorDict: NSDictionary?
+        let result = NSAppleScript(source: script)?.executeAndReturnError(&errorDict)
+        if result == nil {
+            if let err = errorDict {
+                fputs("[tapsense] elevateBinary failed: \(err)\n", stderr)
+            }
+            return false
+        }
+        return isSetuidRoot(at: url)
     }
 
     private func resolveSidecarPath() -> URL {

@@ -7,7 +7,6 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
     private let statusMenuItem = NSMenuItem(title: "Status: Stopped", action: nil, keyEquivalent: "")
     private let lastEventMenuItem = NSMenuItem(title: "No events yet", action: nil, keyEquivalent: "")
     private let toggleMenuItem = NSMenuItem(title: "Start Listening", action: #selector(toggleListening), keyEquivalent: "")
-    private let simulateMenuItem = NSMenuItem(title: "Simulate Mode", action: #selector(toggleSimulate), keyEquivalent: "")
     private let testModeMenuItem = NSMenuItem(title: "Test Mode (Notify on Tap)", action: #selector(toggleTestMode), keyEquivalent: "")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -27,15 +26,10 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         toggleMenuItem.target = self
         menu.addItem(toggleMenuItem)
 
-        simulateMenuItem.target = self
-        simulateMenuItem.state = .on
-        menu.addItem(simulateMenuItem)
-
         testModeMenuItem.target = self
-        testModeMenuItem.state = .off
+        testModeMenuItem.state = .on
         menu.addItem(testModeMenuItem)
 
-        menu.addItem(makeModeMenu())
         menu.addItem(makeSensitivityMenu())
         menu.addItem(.separator())
 
@@ -49,19 +43,9 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
 
         statusItem.menu = menu
         refreshMenu()
-    }
 
-    private func makeModeMenu() -> NSMenuItem {
-        let modeItem = NSMenuItem(title: "Mode", action: nil, keyEquivalent: "")
-        let submenu = NSMenu()
-        for mode in TapSenseMode.allCases {
-            let item = NSMenuItem(title: mode.title, action: #selector(selectMode(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = mode.rawValue
-            submenu.addItem(item)
-        }
-        modeItem.submenu = submenu
-        return modeItem
+        // Auto-start listening on launch.
+        controller.start()
     }
 
     private func makeSensitivityMenu() -> NSMenuItem {
@@ -81,7 +65,6 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         statusMenuItem.title = "Status: \(controller.statusText)"
         lastEventMenuItem.title = controller.lastEventText
         toggleMenuItem.title = controller.isRunning ? "Stop Listening" : "Start Listening"
-        simulateMenuItem.state = controller.simulateMode ? .on : .off
         testModeMenuItem.state = controller.testMode ? .on : .off
         updateSubmenuStates()
         if let button = statusItem.button {
@@ -94,10 +77,7 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
             guard let submenu = item.submenu else { return }
             for child in submenu.items {
                 if let raw = child.representedObject as? String,
-                   let mode = TapSenseMode(rawValue: raw) {
-                    child.state = mode == controller.mode ? .on : .off
-                } else if let raw = child.representedObject as? String,
-                          let sensitivity = TapSenseSensitivity(rawValue: raw) {
+                   let sensitivity = TapSenseSensitivity(rawValue: raw) {
                     child.state = sensitivity == controller.sensitivity ? .on : .off
                 }
             }
@@ -108,31 +88,9 @@ final class MenuAppController: NSObject, NSApplicationDelegate {
         controller.toggle()
     }
 
-    @objc private func toggleSimulate() {
-        controller.simulateMode.toggle()
-        if controller.isRunning {
-            controller.stop()
-            controller.start()
-        } else {
-            refreshMenu()
-        }
-    }
-
     @objc private func toggleTestMode() {
         controller.testMode.toggle()
         refreshMenu()
-    }
-
-    @objc private func selectMode(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String,
-              let mode = TapSenseMode(rawValue: raw) else { return }
-        controller.mode = mode
-        if controller.isRunning {
-            controller.stop()
-            controller.start()
-        } else {
-            refreshMenu()
-        }
     }
 
     @objc private func selectSensitivity(_ sender: NSMenuItem) {

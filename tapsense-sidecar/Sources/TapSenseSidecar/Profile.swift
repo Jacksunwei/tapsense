@@ -1,10 +1,5 @@
 import Foundation
 
-enum TapMode: String {
-    case palmRest
-    case desk
-}
-
 enum TapSensitivity: String {
     case low
     case medium
@@ -12,7 +7,6 @@ enum TapSensitivity: String {
 }
 
 struct DetectorProfile {
-    let mode: TapMode
     let sensitivity: TapSensitivity
     let magnitudeThreshold: Double
     let minGapMs: Double
@@ -21,20 +15,32 @@ struct DetectorProfile {
 }
 
 enum ProfileFactory {
-    static func make(mode: TapMode, sensitivity: TapSensitivity) -> DetectorProfile {
-        switch (mode, sensitivity) {
-        case (.palmRest, .low):
-            return DetectorProfile(mode: mode, sensitivity: sensitivity, magnitudeThreshold: 1.2, minGapMs: 70, maxGapMs: 280, cooldownMs: 1000)
-        case (.palmRest, .medium):
-            return DetectorProfile(mode: mode, sensitivity: sensitivity, magnitudeThreshold: 0.9, minGapMs: 60, maxGapMs: 320, cooldownMs: 900)
-        case (.palmRest, .high):
-            return DetectorProfile(mode: mode, sensitivity: sensitivity, magnitudeThreshold: 0.6, minGapMs: 50, maxGapMs: 340, cooldownMs: 850)
-        case (.desk, .low):
-            return DetectorProfile(mode: mode, sensitivity: sensitivity, magnitudeThreshold: 1.0, minGapMs: 90, maxGapMs: 360, cooldownMs: 1200)
-        case (.desk, .medium):
-            return DetectorProfile(mode: mode, sensitivity: sensitivity, magnitudeThreshold: 0.8, minGapMs: 80, maxGapMs: 380, cooldownMs: 1100)
-        case (.desk, .high):
-            return DetectorProfile(mode: mode, sensitivity: sensitivity, magnitudeThreshold: 0.5, minGapMs: 70, maxGapMs: 400, cooldownMs: 1000)
+    // Central tuning knob — calibrated on M-series MacBook Air palm rest.
+    static let baseThreshold: Double = 0.02
+
+    // low = harder to trigger (fewer false positives), high = easier to trigger.
+    static let sensitivityMultiplier: [TapSensitivity: Double] = [
+        .low: 1.25,
+        .medium: 1.00,
+        .high: 0.75,
+    ]
+
+    static func make(sensitivity: TapSensitivity) -> DetectorProfile {
+        let threshold = baseThreshold * (sensitivityMultiplier[sensitivity] ?? 1.0)
+
+        let (minGap, maxGap, cooldown): (Double, Double, Double)
+        switch sensitivity {
+        case .low:    (minGap, maxGap, cooldown) = (120, 400, 1000)
+        case .medium: (minGap, maxGap, cooldown) = (110, 450, 900)
+        case .high:   (minGap, maxGap, cooldown) = (100, 500, 850)
         }
+
+        return DetectorProfile(
+            sensitivity: sensitivity,
+            magnitudeThreshold: threshold,
+            minGapMs: minGap,
+            maxGapMs: maxGap,
+            cooldownMs: cooldown
+        )
     }
 }
