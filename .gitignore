@@ -4,3 +4,5 @@ tapsense-sidecar/.build/
 tapsense-app/.build/
 dist/
 .DS_Store
+__pycache__/
+.venv/

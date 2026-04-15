@@ -13,7 +13,7 @@ final class SidecarController: NSObject {
 
     var simulateMode = false
     var testMode = true
-    var sensitivity: TapSenseSensitivity = .low
+    var sensitivity: TapSenseSensitivity = .medium
     var onStateChange: (() -> Void)?
 
     override init() {

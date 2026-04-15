@@ -12,6 +12,7 @@ let package = Package(
         .target(
             name: "TapSenseCore",
             path: "Sources/TapSenseCore",
+            resources: [.process("tap_model.mlpackage")],
             linkerSettings: [
                 .linkedFramework("IOKit"),
                 .linkedFramework("CoreFoundation"),

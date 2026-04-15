@@ -89,7 +89,7 @@ if options.simulate {
     source = IOKitAccelerometer()
 }
 
-let detector = TapDetector(profile: profile)
+let detector = MLTapDetector(profile: profile)
 
 fputs(String(format: "[sidecar] sens=%@ threshold=%.3fg refractory=%.0fms maxGap=%.0fms\n",
              options.sensitivity.rawValue,
