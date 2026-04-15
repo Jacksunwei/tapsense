@@ -2,19 +2,26 @@ import Foundation
 import IOKit
 import IOKit.hid
 
-struct AccelerometerReading {
-    let x: Double
-    let y: Double
-    let z: Double
-    let timestamp: TimeInterval
+public struct AccelerometerReading {
+    public let x: Double
+    public let y: Double
+    public let z: Double
+    public let timestamp: TimeInterval
+
+    public init(x: Double, y: Double, z: Double, timestamp: TimeInterval) {
+        self.x = x
+        self.y = y
+        self.z = z
+        self.timestamp = timestamp
+    }
 }
 
-protocol AccelerometerSource {
+public protocol AccelerometerSource {
     func start(callback: @escaping (AccelerometerReading) -> Void) -> Bool
     func stop()
 }
 
-final class IOKitAccelerometer: AccelerometerSource {
+public final class IOKitAccelerometer: AccelerometerSource {
     private var device: IOHIDDevice?
     private var callback: ((AccelerometerReading) -> Void)?
     private static let reportBufferLength = 4096
@@ -24,8 +31,10 @@ final class IOKitAccelerometer: AccelerometerSource {
     private static let scaleFactor = 65536.0
     private let reportBuffer: UnsafeMutablePointer<UInt8>
     private var rawLogCount = 0
+    private var reportCount = 0
+    private var startTime: TimeInterval = 0
 
-    init() {
+    public init() {
         reportBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Self.reportBufferLength)
         reportBuffer.initialize(repeating: 0, count: Self.reportBufferLength)
     }
@@ -36,15 +45,13 @@ final class IOKitAccelerometer: AccelerometerSource {
         reportBuffer.deallocate()
     }
 
-    func start(callback: @escaping (AccelerometerReading) -> Void) -> Bool {
+    public func start(callback: @escaping (AccelerometerReading) -> Void) -> Bool {
         self.callback = callback
 
         // Wake the sensor by setting properties on AppleSPUHIDDriver nodes (NOT the device).
-        // Reference: macimu/_spu.py — the driver node is what powers the sensor; the device
-        // node only exposes the HID interface. Setting properties on the device is silently ignored.
         wakeSPUDrivers()
 
-        // Find AppleSPUHIDDevice directly — bypasses IOHIDManager which skips RegisterService=No devices
+        // Find AppleSPUHIDDevice directly
         let matching = IOServiceMatching("AppleSPUHIDDevice")
         var iterator: io_iterator_t = 0
         let kr = IOServiceGetMatchingServices(kIOMainPortDefault, matching, &iterator)
@@ -54,7 +61,6 @@ final class IOKitAccelerometer: AccelerometerSource {
         }
         defer { IOObjectRelease(iterator) }
 
-        // Find the accelerometer service (usage page 0xFF00, usage 0x03)
         var accelService: io_service_t = 0
         var service = IOIteratorNext(iterator)
         while service != 0 {
@@ -77,14 +83,12 @@ final class IOKitAccelerometer: AccelerometerSource {
         }
         defer { IOObjectRelease(accelService) }
 
-        // Create IOHIDDevice from the service
         guard let hidDevice = IOHIDDeviceCreate(kCFAllocatorDefault, accelService) else {
             fputs("[accelerometer] IOHIDDeviceCreate failed.\n", stderr)
             return false
         }
         self.device = hidDevice
 
-        // Open with flags=0 (NOT kIOHIDOptionsTypeSeizeDevice — that requires root and kills callbacks)
         let openResult = IOHIDDeviceOpen(hidDevice, IOOptionBits(0))
         guard openResult == kIOReturnSuccess else {
             fputs("[accelerometer] IOHIDDeviceOpen failed: \(openResult)\n", stderr)
@@ -106,7 +110,7 @@ final class IOKitAccelerometer: AccelerometerSource {
         return true
     }
 
-    func stop() {
+    public func stop() {
         if let device {
             IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
             IOHIDDeviceClose(device, IOOptionBits(0))
@@ -137,6 +141,17 @@ final class IOKitAccelerometer: AccelerometerSource {
             timestamp: ProcessInfo.processInfo.systemUptime
         )
         self.callback?(reading)
+
+        if startTime == 0 {
+            startTime = reading.timestamp
+        }
+        reportCount += 1
+        let elapsed = reading.timestamp - startTime
+        if elapsed >= 1.0 {
+            fputs("[accelerometer] Frequency: \(Double(reportCount) / elapsed) Hz\n", stderr)
+            reportCount = 0
+            startTime = reading.timestamp
+        }
     }
 
     private func wakeSPUDrivers() {

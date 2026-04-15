@@ -1,4 +1,5 @@
 import Foundation
+import TapSenseCore
 
 struct SidecarOptions {
     let simulate: Bool
@@ -6,6 +7,7 @@ struct SidecarOptions {
     let thresholdOverride: Double?
     let keySuppressionMs: Double?
     let keyLookaheadMs: Double?
+    let recordFile: String?
 }
 
 func emitJSON(_ dict: [String: Any]) {
@@ -21,6 +23,7 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
     var thresholdOverride: Double? = nil
     var keySuppressionMs: Double? = nil
     var keyLookaheadMs: Double? = nil
+    var recordFile: String? = nil
 
     var index = 1
     while index < arguments.count {
@@ -28,6 +31,11 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
         switch argument {
         case "--simulate":
             simulate = true
+        case "--record":
+            if index + 1 < arguments.count {
+                recordFile = arguments[index + 1]
+                index += 1
+            }
         case "--sensitivity":
             if index + 1 < arguments.count,
                let parsed = TapSensitivity(rawValue: arguments[index + 1]) {
@@ -55,7 +63,7 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
         index += 1
     }
 
-    return SidecarOptions(simulate: simulate, sensitivity: sensitivity, thresholdOverride: thresholdOverride, keySuppressionMs: keySuppressionMs, keyLookaheadMs: keyLookaheadMs)
+    return SidecarOptions(simulate: simulate, sensitivity: sensitivity, thresholdOverride: thresholdOverride, keySuppressionMs: keySuppressionMs, keyLookaheadMs: keyLookaheadMs, recordFile: recordFile)
 }
 
 let options = parseOptions(arguments: CommandLine.arguments)

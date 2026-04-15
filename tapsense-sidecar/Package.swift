@@ -4,18 +4,27 @@ import PackageDescription
 let package = Package(
     name: "TapSenseSidecar",
     platforms: [.macOS(.v13)],
+    products: [
+        .library(name: "TapSenseCore", targets: ["TapSenseCore"]),
+        .executable(name: "TapSenseSidecar", targets: ["TapSenseSidecar"]),
+    ],
     targets: [
-        .executableTarget(
-            name: "TapSenseSidecar",
-            path: "Sources/TapSenseSidecar",
+        .target(
+            name: "TapSenseCore",
+            path: "Sources/TapSenseCore",
             linkerSettings: [
                 .linkedFramework("IOKit"),
                 .linkedFramework("CoreFoundation"),
             ]
         ),
+        .executableTarget(
+            name: "TapSenseSidecar",
+            dependencies: ["TapSenseCore"],
+            path: "Sources/TapSenseSidecar"
+        ),
         .testTarget(
             name: "TapSenseSidecarTests",
-            dependencies: ["TapSenseSidecar"]
+            dependencies: ["TapSenseCore"]
         )
     ]
 )

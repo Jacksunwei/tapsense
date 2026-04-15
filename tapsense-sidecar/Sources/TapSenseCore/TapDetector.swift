@@ -1,15 +1,20 @@
 import Foundation
 
-struct TapEvent {
-    let count: Int
-    let timestamp: TimeInterval
+public struct TapEvent {
+    public let count: Int
+    public let timestamp: TimeInterval
 
-    var pattern: String {
+    public var pattern: String {
         switch count {
         case 1: return "single"
         case 2: return "double"
         default: return "triple"
         }
+    }
+
+    public init(count: Int, timestamp: TimeInterval) {
+        self.count = count
+        self.timestamp = timestamp
     }
 }
 
@@ -21,7 +26,7 @@ struct TapEvent {
 /// Pattern emission: after each fired tap, wait `maxGapMs` for the next tap.
 /// If no next tap arrives within that window, emit the accumulated count.
 /// If `maxTapsPerPattern` taps accumulate, emit immediately.
-final class TapDetector {
+public final class TapDetector {
     private let magnitudeThreshold: Double
     private let maxGapMs: Double
     private let refractoryMs: Double
@@ -47,7 +52,7 @@ final class TapDetector {
     private let releaseRatio: Double
     private let releaseSamples: Int
 
-    init(
+    public init(
         magnitudeThreshold: Double = 0.20,
         minGapMs: Double = 60,
         maxGapMs: Double = 320,
@@ -70,7 +75,7 @@ final class TapDetector {
         self.lastEmitTime = -(cooldownMs / 1000)
     }
 
-    convenience init(profile: DetectorProfile, maxTapsPerPattern: Int = 3) {
+    public convenience init(profile: DetectorProfile, maxTapsPerPattern: Int = 3) {
         self.init(
             magnitudeThreshold: profile.magnitudeThreshold,
             minGapMs: profile.minGapMs,
@@ -80,7 +85,7 @@ final class TapDetector {
         )
     }
 
-    func process(_ reading: AccelerometerReading) -> TapEvent? {
+    public func process(_ reading: AccelerometerReading) -> TapEvent? {
         let now = reading.timestamp
         var timedOutEvent: TapEvent? = nil
 

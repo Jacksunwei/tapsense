@@ -1,6 +1,6 @@
 import Foundation
 
-final class SimulatedAccelerometer: AccelerometerSource {
+public final class SimulatedAccelerometer: AccelerometerSource {
     private var timer: DispatchSourceTimer?
     private let queue = DispatchQueue(label: "accelerometer.simulate")
 
@@ -13,7 +13,9 @@ final class SimulatedAccelerometer: AccelerometerSource {
         [0, 15, 30],
     ]
 
-    func start(callback: @escaping (AccelerometerReading) -> Void) -> Bool {
+    public init() {}
+
+    public func start(callback: @escaping (AccelerometerReading) -> Void) -> Bool {
         fputs("[simulator] Running in simulation mode. Cycling single, double, and triple tap patterns.\n", stderr)
 
         let source = DispatchSource.makeTimerSource(queue: queue)
@@ -54,7 +56,7 @@ final class SimulatedAccelerometer: AccelerometerSource {
         )
     }
 
-    func stop() {
+    public func stop() {
         timer?.cancel()
         timer = nil
     }

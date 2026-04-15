@@ -5,13 +5,16 @@ import CoreGraphics
 /// recent key event so the tap detector can ignore accelerometer vibrations caused by typing.
 ///
 /// Requires root OR accessibility permission. Under `sudo` the tap is allowed.
-final class KeyMonitor {
+public final class KeyMonitor {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
-    private(set) var lastKeyEventTime: TimeInterval = 0
-    private(set) var eventCount: Int = 0
+    
+    public private(set) var lastKeyEventTime: TimeInterval = 0
+    public private(set) var eventCount: Int = 0
 
-    func start() -> Bool {
+    public init() {}
+
+    public func start() -> Bool {
         let mask = (1 << CGEventType.keyDown.rawValue)
                  | (1 << CGEventType.flagsChanged.rawValue)
                  | (1 << CGEventType.leftMouseDown.rawValue)
@@ -56,7 +59,7 @@ final class KeyMonitor {
         return true
     }
 
-    func stop() {
+    public func stop() {
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
         }
