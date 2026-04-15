@@ -18,6 +18,10 @@ final class IOKitAccelerometer: AccelerometerSource {
     private var device: IOHIDDevice?
     private var callback: ((AccelerometerReading) -> Void)?
     private static let reportBufferLength = 4096
+    private static let xOffset = 6
+    private static let yOffset = 10
+    private static let zOffset = 14
+    private static let scaleFactor = 65536.0
     private let reportBuffer: UnsafeMutablePointer<UInt8>
     private var rawLogCount = 0
 
@@ -122,14 +126,14 @@ final class IOKitAccelerometer: AccelerometerSource {
             fputs("[report \(rawLogCount)] len=\(length): \(hex)\n", stderr)
         }
 
-        guard let x = readInt32LE(buffer, offset: 6),
-              let y = readInt32LE(buffer, offset: 10),
-              let z = readInt32LE(buffer, offset: 14) else { return }
+        guard let x = readInt32LE(buffer, offset: Self.xOffset),
+              let y = readInt32LE(buffer, offset: Self.yOffset),
+              let z = readInt32LE(buffer, offset: Self.zOffset) else { return }
 
         let reading = AccelerometerReading(
-            x: Double(x) / 65536.0,
-            y: Double(y) / 65536.0,
-            z: Double(z) / 65536.0,
+            x: Double(x) / Self.scaleFactor,
+            y: Double(y) / Self.scaleFactor,
+            z: Double(z) / Self.scaleFactor,
             timestamp: ProcessInfo.processInfo.systemUptime
         )
         self.callback?(reading)

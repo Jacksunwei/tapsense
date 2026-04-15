@@ -5,7 +5,7 @@ let package = Package(
     name: "TapSenseApp",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "TapSenseApp", targets: ["TapSenseApp"]),
+        .executable(name: "TapSense", targets: ["TapSenseApp"]),
     ],
     targets: [
         .executableTarget(

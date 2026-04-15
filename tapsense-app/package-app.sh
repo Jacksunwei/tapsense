@@ -16,9 +16,9 @@ rm -rf "$APP_ROOT"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
 cp "$ROOT/tapsense-app/Info.plist" "$CONTENTS/Info.plist"
-cp "$ROOT/tapsense-app/.build/release/TapSenseApp" "$MACOS_DIR/TapSenseApp"
+cp "$ROOT/tapsense-app/.build/release/TapSense" "$MACOS_DIR/TapSense"
 cp "$ROOT/tapsense-sidecar/.build/release/TapSenseSidecar" "$RESOURCES_DIR/TapSenseSidecar"
-chmod +x "$MACOS_DIR/TapSenseApp" "$RESOURCES_DIR/TapSenseSidecar"
+chmod +x "$MACOS_DIR/TapSense" "$RESOURCES_DIR/TapSenseSidecar"
 
 echo "==> Bundle ready"
 echo "    $APP_ROOT"

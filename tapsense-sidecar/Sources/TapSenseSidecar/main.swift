@@ -4,6 +4,8 @@ struct SidecarOptions {
     let simulate: Bool
     let sensitivity: TapSensitivity
     let thresholdOverride: Double?
+    let keySuppressionMs: Double?
+    let keyLookaheadMs: Double?
 }
 
 func emitJSON(_ dict: [String: Any]) {
@@ -17,6 +19,8 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
     var simulate = false
     var sensitivity: TapSensitivity = .medium
     var thresholdOverride: Double? = nil
+    var keySuppressionMs: Double? = nil
+    var keyLookaheadMs: Double? = nil
 
     var index = 1
     while index < arguments.count {
@@ -35,13 +39,23 @@ func parseOptions(arguments: [String]) -> SidecarOptions {
                 thresholdOverride = parsed
                 index += 1
             }
+        case "--key-suppression":
+            if index + 1 < arguments.count, let parsed = Double(arguments[index + 1]) {
+                keySuppressionMs = parsed
+                index += 1
+            }
+        case "--key-lookahead":
+            if index + 1 < arguments.count, let parsed = Double(arguments[index + 1]) {
+                keyLookaheadMs = parsed
+                index += 1
+            }
         default:
             break
         }
         index += 1
     }
 
-    return SidecarOptions(simulate: simulate, sensitivity: sensitivity, thresholdOverride: thresholdOverride)
+    return SidecarOptions(simulate: simulate, sensitivity: sensitivity, thresholdOverride: thresholdOverride, keySuppressionMs: keySuppressionMs, keyLookaheadMs: keyLookaheadMs)
 }
 
 let options = parseOptions(arguments: CommandLine.arguments)
@@ -78,8 +92,8 @@ let keyStarted = keyMonitor.start()
 if !keyStarted {
     fputs("[sidecar] WARNING: keyboard monitor failed — typing will NOT be suppressed.\n", stderr)
 }
-let keySuppressionSec: TimeInterval = 0.200   // skip samples within 200ms AFTER a key event
-let keyLookaheadSec: TimeInterval = 0.500     // delay emit 500ms — cancel if any key fires during window
+let keySuppressionSec: TimeInterval = (options.keySuppressionMs ?? 200.0) / 1000.0
+let keyLookaheadSec: TimeInterval = (options.keyLookaheadMs ?? 500.0) / 1000.0
 
 let started = source.start { reading in
     let sinceKey = reading.timestamp - keyMonitor.lastKeyEventTime

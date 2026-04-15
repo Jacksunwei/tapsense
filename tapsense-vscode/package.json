@@ -65,6 +65,16 @@
           "default": "medium",
           "description": "Detection sensitivity to pass to the sidecar."
         },
+        "tapsense.keySuppressionMs": {
+          "type": "number",
+          "default": 200,
+          "description": "Skip samples within this many milliseconds AFTER a key or mouse event."
+        },
+        "tapsense.keyLookaheadMs": {
+          "type": "number",
+          "default": 500,
+          "description": "Delay emit this many milliseconds — cancel if any key/mouse event fires during window."
+        },
         "tapsense.autoStart": {
           "type": "boolean",
           "default": false,

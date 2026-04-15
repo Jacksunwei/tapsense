@@ -12,7 +12,10 @@ final class KeyMonitor {
     private(set) var eventCount: Int = 0
 
     func start() -> Bool {
-        let mask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
+        let mask = (1 << CGEventType.keyDown.rawValue)
+                 | (1 << CGEventType.flagsChanged.rawValue)
+                 | (1 << CGEventType.leftMouseDown.rawValue)
+                 | (1 << CGEventType.leftMouseUp.rawValue)
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
 
         // Try HID-level tap first (captures events earlier, more reliable under sudo).

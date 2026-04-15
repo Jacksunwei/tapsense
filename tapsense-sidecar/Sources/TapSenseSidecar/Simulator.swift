@@ -21,7 +21,9 @@ final class SimulatedAccelerometer: AccelerometerSource {
         source.setEventHandler { [weak self] in
             guard let self = self else { return }
             let reading = self.generateReading()
-            callback(reading)
+            DispatchQueue.main.async {
+                callback(reading)
+            }
         }
         source.resume()
         self.timer = source
