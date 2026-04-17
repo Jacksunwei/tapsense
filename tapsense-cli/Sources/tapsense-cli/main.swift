@@ -8,6 +8,7 @@ if arguments.contains("--help") || arguments.count < 2 {
     print("Usage: tapsense-cli [mode]")
     print("Modes:")
     print("  --collect [pattern] : Start data collection (default pattern: single)")
+    print("  --location [name]   : Location of tap (default: desk)")
     print("  --test-model <path> : Test a trained model (.mlpackage or .mlmodel)")
     exit(0)
 }
@@ -15,7 +16,11 @@ if arguments.contains("--help") || arguments.count < 2 {
 if arguments.contains("--collect") {
     let patternIdx = arguments.firstIndex(of: "--collect")!
     let pattern = patternIdx + 1 < arguments.count ? arguments[patternIdx + 1] : "single"
-    runDataCollection(pattern: pattern)
+    
+    let locationIdx = arguments.firstIndex(of: "--location")
+    let location = (locationIdx != nil && locationIdx! + 1 < arguments.count) ? arguments[locationIdx! + 1] : "desk"
+    
+    runDataCollection(pattern: pattern, location: location)
 } else if let modelIdx = arguments.firstIndex(of: "--test-model"), modelIdx + 1 < arguments.count {
     let modelPath = arguments[modelIdx + 1]
     runModelTest(modelPath: modelPath)
@@ -23,7 +28,7 @@ if arguments.contains("--collect") {
     print("Invalid arguments. Use --help for usage.")
 }
 
-func runDataCollection(pattern: String) {
+func runDataCollection(pattern: String, location: String) {
     print("TapSense CLI - Data Collection Mode")
     
     let sampler = Sampler(targetFs: 200.0)
@@ -33,7 +38,7 @@ func runDataCollection(pattern: String) {
     var sampleBuffer: [AccelerometerReading] = []
     let maxBufferSize = 400 // 2 seconds at 200Hz
 
-    let outputFileName = "tapsense-data/raw/desk_\(pattern)_tap.jsonl"
+    let outputFileName = "tapsense-data/raw/\(location)_\(pattern)_tap.jsonl"
 
     print("Starting data collection for pattern: \(pattern)")
     print("File will be saved to: \(outputFileName)")
