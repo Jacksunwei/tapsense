@@ -46,7 +46,7 @@
         "tapsense.sidecarPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the tapsense-sidecar binary. If empty, uses the built binary in the repo."
+          "description": "Path to the tapsense-daemon binary. If empty, uses the built binary in the repo."
         },
         "tapsense.simulateMode": {
           "type": "boolean",
@@ -132,7 +132,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "tsc --noEmit -p ./",
-    "build:sidecar": "cd ../tapsense-sidecar && swift build -c release"
+    "build:sidecar": "cd ../tapsense-daemon && swift build -c release"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

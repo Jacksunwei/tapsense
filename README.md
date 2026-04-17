@@ -72,7 +72,7 @@ In VS Code, `Cmd+L` runs `expandLineSelection`. Let's map it to a double-tap:
 
 ## 📂 Project Structure
 
-- **`tapsense-sidecar/`**: The native Swift engine that talks to the Apple SPU accelerometer.
+- **`tapsense-daemon/`**: The native Swift engine that talks to the Apple SPU accelerometer.
 - **`tapsense-app/`**: The macOS menu bar controller.
 - **`tapsense-vscode/`**: The VS Code extension integration.
 
@@ -82,7 +82,7 @@ In VS Code, `Cmd+L` runs `expandLineSelection`. Let's map it to a double-tap:
 
 For deep dives into the internals:
 - [Architecture & Flow](docs/architecture.md)
-- [Detection Algorithm](docs/tapsense-sidecar.md)
+- [Detection Algorithm](docs/tapsense-daemon.md)
 - [Distribution & Bundling](docs/distribution.md)
 
 ---

@@ -12,7 +12,7 @@ TapSense consists of several distinct components:
 
 1.  **VS Code Extension (`tapsense-vscode`)**: The user interface and command execution layer within VS Code.
 2.  **macOS App (`tapsense-app`)**: A menu bar app that manages the lifecycle of the sidecar and handles user configuration.
-3.  **Native Sidecar (`tapsense-sidecar`)**: A Swift-based daemon that reads accelerometer data, processes it, and classifies gestures.
+3.  **Native Daemon (`tapsense-daemon`)**: A Swift-based daemon that reads accelerometer data, processes it, and classifies gestures.
 4.  **Training Pipeline (`training-pipeline`)**: A Python-based pipeline using PyTorch to train the gesture classification models.
 5.  **Data Collector (`data-collector`)**: A tool for gathering accelerometer data to train the models.
 
@@ -32,7 +32,7 @@ TapSense relies on a "Trigger-then-Classify" ML architecture.
 
 ### 3. Classification
 - The trained model is converted to Core ML format.
-- The Swift sidecar (`tapsense-sidecar`) uses `CoreML` and a fixed-grid `Resampler` to process incoming data and classify it using the model.
+- The Swift daemon (`tapsense-daemon`) uses `CoreML` and a fixed-grid `Resampler` to process incoming data and classify it using the model.
 
 ## Current Status & Critical Gotchas
 

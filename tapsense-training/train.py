@@ -24,11 +24,12 @@ def load_dataset():
     base_dir = os.path.dirname(__file__)
     
     # Load data
-    single_taps = np.load(os.path.join(base_dir, "single_taps_segments.npy"))
-    double_taps = np.load(os.path.join(base_dir, "double_taps_segments.npy"))
-    single_noise = np.load(os.path.join(base_dir, "single_taps_noise_segments.npy"))
-    double_noise = np.load(os.path.join(base_dir, "double_taps_noise_segments.npy"))
-    dedicated_noise = np.load(os.path.join(base_dir, "noise_noise_segments.npy"))
+        processed_dir = os.path.join(os.path.dirname(base_dir), "tapsense-data", "processed")
+        single_taps = np.load(os.path.join(processed_dir, "single_taps_segments.npy"))
+        double_taps = np.load(os.path.join(processed_dir, "double_taps_segments.npy"))
+        single_noise = np.load(os.path.join(processed_dir, "single_taps_noise_segments.npy"))
+        double_noise = np.load(os.path.join(processed_dir, "double_taps_noise_segments.npy"))
+        dedicated_noise = np.load(os.path.join(processed_dir, "noise_noise_segments.npy"))
     
     noise = np.concatenate([single_noise, double_noise, dedicated_noise], axis=0)
     
@@ -77,7 +78,7 @@ class TapCNN(nn.Module):
         x = self.fc2(x)
         return x
 
-if __name__ == "__main__":
+def train():
     X, y = load_dataset()
     
     # Split into train and test
@@ -162,6 +163,7 @@ if __name__ == "__main__":
     print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
     
     # Save model
-    model_path = os.path.join(os.path.dirname(__file__), "tap_model.pth")
+    model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tapsense-data", "models", "tap_model.pth")
     torch.save(model.state_dict(), model_path)
     print(f"Saved model to {model_path}")
+

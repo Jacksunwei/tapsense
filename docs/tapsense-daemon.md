@@ -1,17 +1,17 @@
-# tapsense-sidecar design
+# tapsense-daemon design
 
 ## Purpose
 
-The sidecar is a native macOS executable that turns sensor samples into higher-level tap events.
+The daemon is a native macOS executable that turns sensor samples into higher-level tap events.
 
 It exists because low-level macOS hardware access is a poor fit for a normal VS Code extension runtime.
 
 ## Main files
 
-- `tapsense-sidecar/Sources/TapSenseSidecar/main.swift`
-- `tapsense-sidecar/Sources/TapSenseSidecar/Accelerometer.swift`
-- `tapsense-sidecar/Sources/TapSenseSidecar/TapDetector.swift`
-- `tapsense-sidecar/Sources/TapSenseSidecar/Simulator.swift`
+- `tapsense-daemon/Sources/TapSenseDaemon/main.swift`
+- `tapsense-core/Sources/TapSenseCore/Accelerometer.swift`
+- `tapsense-core/Sources/TapSenseCore/TapDetector.swift`
+- `tapsense-core/Sources/TapSenseCore/Simulator.swift`
 
 ## Internal structure
 

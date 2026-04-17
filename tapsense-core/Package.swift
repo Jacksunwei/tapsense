@@ -2,11 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "TapSenseSidecar",
+    name: "TapSenseCore",
     platforms: [.macOS(.v13)],
     products: [
         .library(name: "TapSenseCore", targets: ["TapSenseCore"]),
-        .executable(name: "TapSenseSidecar", targets: ["TapSenseSidecar"]),
     ],
     targets: [
         .target(
@@ -18,13 +17,8 @@ let package = Package(
                 .linkedFramework("CoreFoundation"),
             ]
         ),
-        .executableTarget(
-            name: "TapSenseSidecar",
-            dependencies: ["TapSenseCore"],
-            path: "Sources/TapSenseSidecar"
-        ),
         .testTarget(
-            name: "TapSenseSidecarTests",
+            name: "TapSenseCoreTests",
             dependencies: ["TapSenseCore"]
         )
     ]

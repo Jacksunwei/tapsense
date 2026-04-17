@@ -3,9 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 
-echo "==> Building tapsense-sidecar (Swift)..."
-cd "$ROOT/tapsense-sidecar"
-xcrun coremlc compile Sources/TapSenseCore/tap_model.mlpackage Sources/TapSenseCore
+echo "==> Building tapsense-daemon (Swift)..."
+cd "$ROOT/tapsense-daemon"
 swift build -c release
 
 echo ""
@@ -26,7 +25,7 @@ cd "$ROOT/tapsense-app"
 
 echo ""
 echo "==> Build complete!"
-echo "    Sidecar binary: $ROOT/tapsense-sidecar/.build/release/TapSenseSidecar"
+echo "    Daemon binary: $ROOT/tapsense-daemon/.build/release/TapSenseDaemon"
 echo "    Extension output: $ROOT/tapsense-vscode/out/"
 echo "    Menu app executable: $ROOT/tapsense-app/.build/release/TapSenseApp"
 echo "    Bundled app: $ROOT/dist/TapSense.app"

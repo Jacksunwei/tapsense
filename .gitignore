@@ -1,6 +1,8 @@
 tapsense-vscode/node_modules/
 tapsense-vscode/out/
-tapsense-sidecar/.build/
+tapsense-daemon/.build/
+tapsense-core/.build/
+tapsense-cli/.build/
 tapsense-app/.build/
 dist/
 .DS_Store

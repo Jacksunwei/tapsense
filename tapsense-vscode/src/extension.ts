@@ -69,7 +69,7 @@ function getSidecarPath(): string {
   }
   const extensionDir = path.resolve(__dirname, "..", "..");
   const repoRoot = path.resolve(extensionDir, "..");
-  return path.join(repoRoot, "tapsense-sidecar", ".build", "release", "TapSenseSidecar");
+  return path.join(repoRoot, "tapsense-daemon", ".build", "release", "TapSenseDaemon");
 }
 
 function startListening() {
@@ -95,7 +95,7 @@ function startListening() {
 
   if (!fs.existsSync(binary)) {
     vscode.window.showErrorMessage(
-      `TapSense sidecar binary not found at ${binary}. Build it first with: cd tapsense-sidecar && swift build -c release`,
+      `TapSense daemon binary not found at ${binary}. Build it first with: cd tapsense-daemon && swift build -c release`,
     );
     return;
   }
@@ -107,7 +107,7 @@ function startListening() {
     sidecarProcess = spawned;
   } catch (err) {
     vscode.window.showErrorMessage(
-      `Failed to start TapSense sidecar: ${err}. Build it first with: cd tapsense-sidecar && swift build -c release`,
+      `Failed to start TapSense daemon: ${err}. Build it first with: cd tapsense-daemon && swift build -c release`,
     );
     return;
   }

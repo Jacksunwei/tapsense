@@ -14,6 +14,10 @@ public final class TapClassifier {
         self.model = try MLModel(contentsOf: modelURL)
     }
     
+    public init(contentsOf modelURL: URL) throws {
+        self.model = try MLModel(contentsOf: modelURL)
+    }
+    
     public func classify(resampledData: [[Float]]) -> String? {
         // resampledData should be shape (3, 200)
         guard resampledData.count == 3, resampledData[0].count == 200 else {
