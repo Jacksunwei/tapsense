@@ -87,7 +87,15 @@ func runModelTest(modelPath: String) {
         print("Classifier initialized successfully!")
         
         let sampler = Sampler(targetFs: 200.0)
-        let detector = TapDetector() // Use heuristics to trigger test windows
+        
+        let profile = ProfileFactory.make(sensitivity: .medium)
+        let detector = TapDetector(
+            magnitudeThreshold: profile.magnitudeThreshold,
+            minGapMs: profile.minGapMs,
+            maxGapMs: profile.maxGapMs,
+            cooldownMs: profile.cooldownMs
+        )
+        
         let accelerometer = IOKitAccelerometer()
         
         var sampleBuffer: [AccelerometerReading] = []
