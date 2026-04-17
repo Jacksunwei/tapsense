@@ -48,6 +48,11 @@ public final class TapDetector {
     private var consecutiveAbove: Int = 0
     private var refractoryUntil: TimeInterval = 0
     private var armed: Bool = true  // false after firing until magnitude dips below release
+    
+    /// Timestamp of the last key event to suppress false positives caused by typing.
+    public var lastKeyEventTime: TimeInterval? = nil
+    /// Time window in milliseconds to suppress taps after a key event.
+    public var suppressionWindowMs: Double = 200.0
     private var belowCount: Int = 0
     private let releaseRatio: Double
     private let releaseSamples: Int
@@ -95,6 +100,12 @@ public final class TapDetector {
         }
 
         let magnitude = filteredMagnitude(reading)
+
+        // Keyboard suppression: ignore vibrations caused by typing
+        if let lastKeyTime = lastKeyEventTime, now - lastKeyTime < suppressionWindowMs / 1000.0 {
+            consecutiveAbove = 0
+            return timedOutEvent
+        }
 
         // Re-arming: after a tap fires, require N consecutive samples below release threshold
         // AND the refractory window to elapse before we can fire again.

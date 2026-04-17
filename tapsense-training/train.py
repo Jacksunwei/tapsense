@@ -211,8 +211,18 @@ def train():
             all_predicted.extend(predicted.cpu().numpy())
             
     from sklearn.metrics import classification_report
+    report = classification_report(all_targets, all_predicted, target_names=["no_tap", "single_tap", "double_tap"])
     print("\nFinal Classification Report (on BEST model):")
-    print(classification_report(all_targets, all_predicted, target_names=["no_tap", "single_tap", "double_tap"]))
+    print(report)
+    
+    # Save metrics report next to the best model file
+    metrics_file = os.path.join(models_dir, "tap_model_best_metrics.md")
+    with open(metrics_file, "w") as f:
+        f.write("# Final Classification Report (on BEST model)\n\n")
+        f.write("```\n")
+        f.write(report)
+        f.write("```\n")
+    print(f"Saved metrics report to {metrics_file}")
     
     # Save final model (we still save the state after loop as final)
     final_model_path = os.path.join(models_dir, "tap_model.pth")

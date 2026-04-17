@@ -106,10 +106,16 @@ func runModelTest(modelPath: String) {
             cooldownMs: profile.cooldownMs
         )
         
+        let keyMonitor = KeyMonitor()
+        _ = keyMonitor.start()
+        
         let accelerometer = IOKitAccelerometer()
         
         var sampleBuffer: [AccelerometerReading] = []
         let maxBufferSize = 400
+        
+        var pendingInferenceTargetTimestamp: TimeInterval? = nil
+        var pendingEvent: TapEvent? = nil
         
         print("Starting live test. Please tap your desk...")
         
@@ -122,24 +128,50 @@ func runModelTest(modelPath: String) {
                     sampleBuffer.removeFirst()
                 }
                 
+                detector.lastKeyEventTime = keyMonitor.lastKeyEventTime
+                
                 if let event = detector.process(reading) {
                     print("\n[CANDIDATE] Heuristic triggered: \(event.pattern)")
                     
+                    // Put first peak at index 20. We need 180 samples after the peak.
+                    // 180 samples at 200Hz is 0.9 seconds.
+                    pendingInferenceTargetTimestamp = event.timestamp + 0.9
+                    pendingEvent = event
+                }
+                
+                // Check if we can execute pending inference
+                if let targetTs = pendingInferenceTargetTimestamp, let event = pendingEvent, reading.timestamp >= targetTs {
                     let windowSize = 200
-                    if sampleBuffer.count >= windowSize {
-                        let window = Array(sampleBuffer.suffix(windowSize))
+                    let eventTs = event.timestamp
+                    
+                    // Find index of sample closest to event.timestamp
+                    if let peakIdx = sampleBuffer.enumerated().min(by: { 
+                        abs($0.element.timestamp - eventTs) < abs($1.element.timestamp - eventTs) 
+                    })?.offset {
                         
-                        let x = window.map { Float($0.x) }
-                        let y = window.map { Float($0.y) }
-                        let z = window.map { Float($0.z) }
-                        let resampledData = [x, y, z]
+                        let startIdx = peakIdx - 20
+                        let endIdx = peakIdx + 180
                         
-                        if let prediction = classifier.classify(resampledData: resampledData) {
-                            print("[PREDICTION] ML Model says: \(prediction) tap!")
-                        } else {
-                            print("[PREDICTION] ML Model failed to classify.")
+                        // Check bounds
+                        if startIdx >= 0 && endIdx <= sampleBuffer.count {
+                            let window = Array(sampleBuffer[startIdx..<endIdx])
+                            
+                            let x = window.map { Float($0.x) }
+                            let y = window.map { Float($0.y) }
+                            let z = window.map { Float($0.z) }
+                            let resampledData = [x, y, z]
+                            
+                            if let prediction = classifier.classify(resampledData: resampledData) {
+                                print("[PREDICTION] ML Model says: \(prediction) tap!")
+                            } else {
+                                print("[PREDICTION] ML Model failed to classify.")
+                            }
                         }
                     }
+                    
+                    // Clear pending request
+                    pendingInferenceTargetTimestamp = nil
+                    pendingEvent = nil
                 }
             }
         }
