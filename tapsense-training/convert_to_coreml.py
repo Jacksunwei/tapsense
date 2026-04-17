@@ -5,7 +5,8 @@ from train import TapCNN
 
 def convert():
     base_dir = os.path.dirname(__file__)
-    model_path = os.path.join(base_dir, "tap_model.pth")
+    data_dir = os.path.join(os.path.dirname(base_dir), "tapsense-data")
+    model_path = os.path.join(data_dir, "models", "tap_model_best.pth")
     
     if not os.path.exists(model_path):
         print(f"Model file not found: {model_path}")
@@ -31,7 +32,7 @@ def convert():
     )
     
     # Save as .mlpackage (modern format)
-    output_path = os.path.join(base_dir, "tap_model.mlpackage")
+    output_path = os.path.join(data_dir, "models", "tap_model.mlpackage")
     coreml_model.save(output_path)
     print(f"Saved CoreML model to {output_path}")
 

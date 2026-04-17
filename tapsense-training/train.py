@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import torch
+import glob
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
@@ -23,15 +24,25 @@ class TapDataset(Dataset):
 def load_dataset():
     base_dir = os.path.dirname(__file__)
     
-    # Load data
     processed_dir = os.path.join(os.path.dirname(base_dir), "tapsense-data", "processed")
-    single_taps = np.load(os.path.join(processed_dir, "single_taps_segments.npy"))
-    double_taps = np.load(os.path.join(processed_dir, "double_taps_segments.npy"))
-    single_noise = np.load(os.path.join(processed_dir, "single_taps_noise_segments.npy"))
-    double_noise = np.load(os.path.join(processed_dir, "double_taps_noise_segments.npy"))
-    dedicated_noise = np.load(os.path.join(processed_dir, "noise_noise_segments.npy"))
     
-    noise = np.concatenate([single_noise, double_noise, dedicated_noise], axis=0)
+    single_taps_list = []
+    double_taps_list = []
+    noise_list = []
+    
+    # Find all matching files
+    for f in glob.glob(os.path.join(processed_dir, "*_segments.npy")):
+        if "noise" in f:
+            noise_list.append(np.load(f))
+        elif "double" in f:
+            double_taps_list.append(np.load(f))
+        elif "single" in f:
+            single_taps_list.append(np.load(f))
+            
+    # Concatenate lists into arrays
+    single_taps = np.concatenate(single_taps_list, axis=0) if single_taps_list else np.zeros((0, 200, 3))
+    double_taps = np.concatenate(double_taps_list, axis=0) if double_taps_list else np.zeros((0, 200, 3))
+    noise = np.concatenate(noise_list, axis=0) if noise_list else np.zeros((0, 200, 3))
     
     print(f"Loaded {len(single_taps)} single taps.")
     print(f"Loaded {len(double_taps)} double taps.")
@@ -115,6 +126,10 @@ def train():
     
     print(f"Training on {device}...")
     
+    best_acc = 0.0
+    models_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tapsense-data", "models")
+    os.makedirs(models_dir, exist_ok=True)
+    
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
@@ -137,33 +152,69 @@ def train():
             
         epoch_loss = running_loss / len(train_loader)
         epoch_acc = 100. * correct / total
-        print(f"Epoch {epoch+1}/{num_epochs}: Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.2f}%")
+        
+        # Evaluate on test set per epoch
+        model.eval()
+        test_loss = 0.0
+        test_correct = 0
+        test_total = 0
+        
+        with torch.no_grad():
+            for inputs, targets in test_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, targets)
+                
+                test_loss += loss.item()
+                _, predicted = outputs.max(1)
+                test_total += targets.size(0)
+                test_correct += predicted.eq(targets).sum().item()
+                
+        test_loss /= len(test_loader)
+        test_acc = 100. * test_correct / test_total
+        
+        print(f"Epoch {epoch+1}/{num_epochs}: Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.2f}% | Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
+        
+        # Save best model
+        if test_acc > best_acc:
+            best_acc = test_acc
+            best_model_path = os.path.join(models_dir, "tap_model_best.pth")
+            torch.save(model.state_dict(), best_model_path)
+            print(f"  --> Saved best model with Test Acc: {best_acc:.2f}%")
+            
+        # Save periodic checkpoint
+        if (epoch + 1) % 10 == 0:
+            checkpoint_path = os.path.join(models_dir, f"tap_model_epoch_{epoch+1}.pth")
+            torch.save(model.state_dict(), checkpoint_path)
+            print(f"  --> Saved periodic checkpoint to {checkpoint_path}")
         
     print("Training complete.")
     
-    # Evaluate on test set
+    # Load best model for final evaluation
+    best_model_path = os.path.join(models_dir, "tap_model_best.pth")
+    if os.path.exists(best_model_path):
+        model.load_state_dict(torch.load(best_model_path))
+        print(f"Loaded best model from {best_model_path} for final evaluation.")
+    
+    # Final evaluation for classification report
     model.eval()
-    test_loss = 0.0
-    correct = 0
-    total = 0
+    all_targets = []
+    all_predicted = []
     
     with torch.no_grad():
         for inputs, targets in test_loader:
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
-            loss = criterion(outputs, targets)
-            
-            test_loss += loss.item()
             _, predicted = outputs.max(1)
-            total += targets.size(0)
-            correct += predicted.eq(targets).sum().item()
             
-    test_loss /= len(test_loader)
-    test_acc = 100. * correct / total
-    print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
+            all_targets.extend(targets.cpu().numpy())
+            all_predicted.extend(predicted.cpu().numpy())
+            
+    from sklearn.metrics import classification_report
+    print("\nFinal Classification Report (on BEST model):")
+    print(classification_report(all_targets, all_predicted, target_names=["no_tap", "single_tap", "double_tap"]))
     
-    # Save model
-    model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tapsense-data", "models", "tap_model.pth")
-    torch.save(model.state_dict(), model_path)
-    print(f"Saved model to {model_path}")
-
+    # Save final model (we still save the state after loop as final)
+    final_model_path = os.path.join(models_dir, "tap_model.pth")
+    torch.save(model.state_dict(), final_model_path)
+    print(f"Saved final model to {final_model_path}")
