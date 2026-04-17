@@ -32,38 +32,35 @@ func runDataCollection(pattern: String, location: String) {
     print("TapSense CLI - Data Collection Mode")
     
     let sampler = Sampler(targetFs: 200.0)
-    let detector = TapDetector()
     let accelerometer = IOKitAccelerometer()
 
-    var sampleBuffer: [AccelerometerReading] = []
-    let maxBufferSize = 400 // 2 seconds at 200Hz
-
     let outputFileName = "tapsense-data/raw/\(location)_\(pattern)_tap.jsonl"
+    let fileURL = URL(fileURLWithPath: outputFileName)
+    
+    // Create or clear the file
+    try? "".write(to: fileURL, atomically: true, encoding: .utf8)
 
-    print("Starting data collection for pattern: \(pattern)")
+    print("Starting continuous data collection for pattern: \(pattern)")
     print("File will be saved to: \(outputFileName)")
     print("Press Ctrl+C to stop.")
 
-    print("\n[READY] Please tap your desk when prompted...")
+    print("\n[RECORDING] Recording data at 200Hz...")
 
     let success = accelerometer.start { rawReading in
         let resampled = sampler.addReading(rawReading)
         
         for reading in resampled {
-            sampleBuffer.append(reading)
-            if sampleBuffer.count > maxBufferSize {
-                sampleBuffer.removeFirst()
-            }
-            
-            if let event = detector.process(reading) {
-                print("\n[DETECTED] Heuristic triggered: \(event.pattern) tap!")
+            let data = ["x": reading.x, "y": reading.y, "z": reading.z, "timestamp": reading.timestamp]
+            if let jsonData = try? JSONSerialization.data(withJSONObject: data, options: []),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                let line = jsonString + "\n"
                 
-                let windowSize = 200
-                if sampleBuffer.count >= windowSize {
-                    let window = Array(sampleBuffer.suffix(windowSize))
-                    saveData(window, label: event.pattern, to: outputFileName)
-                    print("[SAVED] Window recorded to \(outputFileName)")
-                    print("\n[READY] Tap again...")
+                if let fileHandle = try? FileHandle(forWritingTo: fileURL) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(line.data(using: .utf8)!)
+                    fileHandle.closeFile()
+                } else {
+                    try? line.write(to: fileURL, atomically: true, encoding: .utf8)
                 }
             }
         }
@@ -72,6 +69,14 @@ func runDataCollection(pattern: String, location: String) {
     guard success else {
         print("Failed to start accelerometer. Run with sudo?")
         exit(1)
+    }
+
+    var tapCounter = 0
+    print("\n[GUIDE] Metronome started. Tap when prompted.")
+    
+    let timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
+        tapCounter += 1
+        print("\n[TAP \(tapCounter)] Please tap now!")
     }
 
     CFRunLoopRun()

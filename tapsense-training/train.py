@@ -24,12 +24,12 @@ def load_dataset():
     base_dir = os.path.dirname(__file__)
     
     # Load data
-        processed_dir = os.path.join(os.path.dirname(base_dir), "tapsense-data", "processed")
-        single_taps = np.load(os.path.join(processed_dir, "single_taps_segments.npy"))
-        double_taps = np.load(os.path.join(processed_dir, "double_taps_segments.npy"))
-        single_noise = np.load(os.path.join(processed_dir, "single_taps_noise_segments.npy"))
-        double_noise = np.load(os.path.join(processed_dir, "double_taps_noise_segments.npy"))
-        dedicated_noise = np.load(os.path.join(processed_dir, "noise_noise_segments.npy"))
+    processed_dir = os.path.join(os.path.dirname(base_dir), "tapsense-data", "processed")
+    single_taps = np.load(os.path.join(processed_dir, "single_taps_segments.npy"))
+    double_taps = np.load(os.path.join(processed_dir, "double_taps_segments.npy"))
+    single_noise = np.load(os.path.join(processed_dir, "single_taps_noise_segments.npy"))
+    double_noise = np.load(os.path.join(processed_dir, "double_taps_noise_segments.npy"))
+    dedicated_noise = np.load(os.path.join(processed_dir, "noise_noise_segments.npy"))
     
     noise = np.concatenate([single_noise, double_noise, dedicated_noise], axis=0)
     

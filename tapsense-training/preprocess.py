@@ -24,7 +24,7 @@ def load_data(file_path):
         print("Error: No data loaded.")
         return None
     
-    t = np.array([d['t'] for d in data])
+    t = np.array([d['t'] if 't' in d else d['timestamp'] for d in data])
     x = np.array([d['x'] for d in data])
     y = np.array([d['y'] for d in data])
     z = np.array([d['z'] for d in data])
@@ -185,6 +185,14 @@ def extract_noise_segments(resampled_data, peak_times, target_fs=200, window_dur
     
     print(f"Extracting noise segments from gaps...")
     
+    if len(peak_indices) == 0:
+        num_windows = len(t_target) // window_size
+        for i in range(num_windows):
+            start_idx = i * window_size
+            end_idx = start_idx + window_size
+            if start_idx >= 0 and end_idx <= len(t_target):
+                segments.append(np.stack([x[start_idx:end_idx], y[start_idx:end_idx], z[start_idx:end_idx]], axis=1))
+            
     # Check gap before first peak
     if len(peak_indices) > 0 and peak_indices[0] >= window_size:
         num_windows = peak_indices[0] // window_size
