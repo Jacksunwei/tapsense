@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 echo "==> Building tapsense-sidecar (Swift)..."
 cd "$ROOT/tapsense-sidecar"
+xcrun coremlc compile Sources/TapSenseCore/tap_model.mlpackage Sources/TapSenseCore
 swift build -c release
 
 echo ""
