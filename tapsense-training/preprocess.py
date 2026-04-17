@@ -128,26 +128,25 @@ def detect_peaks(raw_data, threshold=1.05, min_distance=1.5):
     print(f"Detected {len(filtered_peaks)} peaks in raw data.")
     return np.array(filtered_peaks)
 def segment_data(resampled_data, peak_times, target_fs=200, window_duration=1.0):
-    """Segments resampled data into windows around peak times."""
+    """Segments resampled data into windows with the peak at index 20."""
     t_target = resampled_data['t']
     x = resampled_data['x']
     y = resampled_data['y']
     z = resampled_data['z']
     
     window_size = int(window_duration * target_fs)
-    half_window = window_size // 2
     
     segments = []
     valid_peak_times = []
     
-    print(f"Segmenting into {window_duration}s windows ({window_size} samples)...")
+    print(f"Segmenting into {window_duration}s windows ({window_size} samples) with peak at index 20...")
     
     for peak_t in peak_times:
         # Find closest index in resampled data
         idx = np.argmin(np.abs(t_target - peak_t))
         
-        start_idx = idx - half_window
-        end_idx = idx + half_window
+        start_idx = idx - 20
+        end_idx = idx + 180
         
         # Check bounds
         if start_idx >= 0 and end_idx <= len(t_target):
